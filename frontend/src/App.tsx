@@ -6,6 +6,12 @@ import { Cart } from './pages/Cart';
 import { Checkout } from './pages/Checkout';
 import { OrderConfirmation } from './pages/OrderConfirmation';
 import { WhatsAppFab } from './components/WhatsAppFab';
+import { AdminAuthProvider } from './admin/context/AdminAuthContext';
+import { AdminLayout } from './admin/components/AdminLayout';
+import { AdminLogin } from './admin/pages/AdminLogin';
+import { AdminDashboard } from './admin/pages/AdminDashboard';
+import { AdminProducts } from './admin/pages/AdminProducts';
+import { AdminOrders } from './admin/pages/AdminOrders';
 import './styles/theme.css';
 
 function Header() {
@@ -21,7 +27,7 @@ function Header() {
   );
 }
 
-export default function App() {
+function Storefront() {
   return (
     <CartProvider>
       <Header />
@@ -34,5 +40,21 @@ export default function App() {
       </Routes>
       <WhatsAppFab />
     </CartProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <AdminAuthProvider>
+      <Routes>
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="products" element={<AdminProducts />} />
+          <Route path="orders" element={<AdminOrders />} />
+        </Route>
+        <Route path="/*" element={<Storefront />} />
+      </Routes>
+    </AdminAuthProvider>
   );
 }
