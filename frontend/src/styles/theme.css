@@ -61,6 +61,19 @@ h1, h2, h3, .ss-script {
 .ss-btn-primary:hover { background: var(--ss-gold-light); }
 .ss-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
+.ss-card {
+  background: white;
+  border-radius: var(--ss-radius);
+  box-shadow: var(--ss-shadow);
+  padding: 1rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+a.ss-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(13, 43, 38, 0.18);
+}
+
 .ss-btn-secondary {
   background: transparent;
   color: var(--ss-green-dark);
@@ -69,14 +82,9 @@ h1, h2, h3, .ss-script {
   border-radius: var(--ss-radius);
   font-weight: 500;
   cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
 }
-
-.ss-card {
-  background: white;
-  border-radius: var(--ss-radius);
-  box-shadow: var(--ss-shadow);
-  padding: 1rem;
-}
+.ss-btn-secondary:hover { background: rgba(13, 43, 38, 0.06); }
 
 .ss-badge {
   display: inline-flex;
@@ -95,6 +103,7 @@ h1, h2, h3, .ss-script {
   max-width: 1100px;
   margin: 0 auto;
   padding: 1.5rem;
+  padding-bottom: 5rem; /* leaves clear space so page content never sits behind the fixed WhatsApp button */
 }
 
 .ss-product-grid {
