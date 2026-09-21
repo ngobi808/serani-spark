@@ -35,7 +35,7 @@ export function Catalogue() {
 
   return (
     <div className="ss-container">
-      <h1>Wholesale Catalogue</h1>
+      <h1>Catalogue</h1>
 
       <input
         type="text"
