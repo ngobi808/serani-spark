@@ -21,7 +21,6 @@ export function AdminLayout() {
         <nav style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
           <NavLink to="/admin/dashboard" style={linkStyle}>Dashboard</NavLink>
           <NavLink to="/admin/products" style={linkStyle}>Products</NavLink>
-          <NavLink to="/admin/stock-take" style={linkStyle}>Stock Take</NavLink>
           <NavLink to="/admin/orders" style={linkStyle}>Orders</NavLink>
           <button
             onClick={logout}

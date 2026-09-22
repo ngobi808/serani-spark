@@ -35,6 +35,13 @@ export const adminApi = {
   deactivateProduct: (token: string, id: string) =>
     fetch(`${API_BASE}/admin/products/${id}`, { method: 'DELETE', headers: authHeaders(token) }).then((r) => handle<any>(r)),
 
+  bulkStockTake: (token: string, updates: { id: string; counted_quantity: number }[], reason?: string) =>
+    fetch(`${API_BASE}/admin/products/stock-take`, {
+      method: 'PUT',
+      headers: authHeaders(token),
+      body: JSON.stringify({ updates, reason }),
+    }).then((r) => handle<{ message: string; changed: number; unchanged: number }>(r)),
+
   listOrders: (token: string, status?: string) => {
     const q = status ? `?status=${status}` : '';
     return fetch(`${API_BASE}/admin/orders${q}`, { headers: authHeaders(token) }).then((r) => handle<{ orders: any[] }>(r));
