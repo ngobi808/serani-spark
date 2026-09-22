@@ -3,19 +3,20 @@ interface TrendPoint {
   revenue_kes: number;
 }
 
-export function SalesTrendChart({ data }: { data: TrendPoint[] }) {
-  if (data.length === 0) return null;
+export function SalesTrendChart({ data }: { data: TrendPoint[] | undefined | null }) {
+  const points = data ?? [];
+  if (points.length === 0) return <p style={{ color: '#666', fontSize: '0.85rem' }}>No trend data available yet.</p>;
 
-  const max = Math.max(...data.map((d) => d.revenue_kes), 1);
+  const max = Math.max(...points.map((d) => d.revenue_kes), 1);
   const width = 700;
   const height = 120;
   const barGap = 4;
-  const barWidth = (width - barGap * (data.length - 1)) / data.length;
+  const barWidth = (width - barGap * (points.length - 1)) / points.length;
 
   return (
     <div style={{ overflowX: 'auto' }}>
       <svg viewBox={`0 0 ${width} ${height + 24}`} style={{ width: '100%', maxWidth: 700, height: 'auto' }}>
-        {data.map((d, i) => {
+        {points.map((d, i) => {
           const barHeight = (d.revenue_kes / max) * height;
           const x = i * (barWidth + barGap);
           const y = height - barHeight;
