@@ -15,6 +15,8 @@ export function AdminProducts() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [pendingStock, setPendingStock] = useState<Record<string, number>>({});
+  const [savingBatch, setSavingBatch] = useState(false);
 
   function load() {
     if (!token) return;
@@ -80,13 +82,31 @@ export function AdminProducts() {
     }
   }
 
-  async function adjustStock(p: any, delta: number) {
+  /** Tracks a +/- click locally only — nothing is saved until "Save Changes" is clicked. */
+  function adjustStock(p: any, delta: number) {
+    setPendingStock((prev) => {
+      const current = prev[p.id] ?? p.stock_quantity;
+      return { ...prev, [p.id]: current + delta };
+    });
+  }
+
+  function discardPending() {
+    setPendingStock({});
+  }
+
+  async function savePendingStock() {
     if (!token) return;
+    setSavingBatch(true);
+    setError('');
     try {
-      await adminApi.updateProduct(token, p.id, { stock_quantity: p.stock_quantity + delta });
+      const updates = Object.entries(pendingStock).map(([id, counted_quantity]) => ({ id, counted_quantity }));
+      await adminApi.bulkStockTake(token, updates, 'correction');
+      setPendingStock({});
       load();
     } catch (err: any) {
       setError(err.message);
+    } finally {
+      setSavingBatch(false);
     }
   }
 
@@ -148,7 +168,15 @@ export function AdminProducts() {
                 <td style={{ padding: '0.5rem' }}>{p.cost_price_kes ? `KSh ${Number(p.cost_price_kes).toLocaleString()}` : '—'}</td>
                 <td style={{ padding: '0.5rem' }}>{margin !== null ? `${margin}%` : '—'}</td>
                 <td style={{ padding: '0.5rem' }}>
-                  {p.stock_quantity} (avail: {p.available_quantity})
+                  {pendingStock[p.id] !== undefined ? (
+                    <>
+                      <span style={{ color: '#999', textDecoration: 'line-through' }}>{p.stock_quantity}</span>
+                      {' → '}
+                      <strong style={{ color: 'var(--ss-warning)' }}>{pendingStock[p.id]}</strong>
+                    </>
+                  ) : (
+                    <>{p.stock_quantity} (avail: {p.available_quantity})</>
+                  )}
                   <button onClick={() => adjustStock(p, 1)} style={{ marginLeft: 6 }}>+</button>
                   <button onClick={() => adjustStock(p, -1)} style={{ marginLeft: 2 }}>-</button>
                 </td>
@@ -162,6 +190,37 @@ export function AdminProducts() {
           })}
         </tbody>
       </table>
+
+      {Object.keys(pendingStock).length > 0 && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '1.25rem',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'var(--ss-green-dark)',
+            color: 'white',
+            padding: '0.8rem 1.2rem',
+            borderRadius: 999,
+            boxShadow: 'var(--ss-shadow)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            zIndex: 40,
+          }}
+        >
+          <span>{Object.keys(pendingStock).length} unsaved stock change(s)</span>
+          <button className="ss-btn-primary" onClick={savePendingStock} disabled={savingBatch} style={{ padding: '0.4rem 1rem' }}>
+            {savingBatch ? 'Saving...' : 'Save Changes'}
+          </button>
+          <button
+            onClick={discardPending}
+            style={{ background: 'transparent', color: 'white', border: '1px solid white', borderRadius: 8, padding: '0.4rem 1rem', cursor: 'pointer' }}
+          >
+            Discard
+          </button>
+        </div>
+      )}
     </div>
   );
 }
