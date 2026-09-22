@@ -55,7 +55,7 @@ export function AdminOrders() {
 
   return (
     <div
-      style={{ display: 'grid', gridTemplateColumns: selected ? '1fr 1fr' : '1fr', gap: '2rem', minHeight: '70vh' }}
+      style={{ display: 'grid', gridTemplateColumns: selected ? '1fr 1fr' : '1fr', gap: '2rem', minHeight: '70vh', alignItems: 'start' }}
       onClick={(e) => {
         // Only close when the click lands directly on this background container itself,
         // never when it bubbles up from an actual row, button, or input inside it.
