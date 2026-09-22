@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import { adminApi } from '../api/adminClient';
 
@@ -16,23 +17,32 @@ export function AdminDashboard() {
   if (!data) return <p>Loading dashboard...</p>;
 
   const cards = [
-    { label: 'Total Orders', value: data.total_orders },
-    { label: 'Paid Orders', value: data.paid_orders },
-    { label: 'Pending Orders', value: data.pending_orders },
-    { label: 'Sales Total', value: `KSh ${data.sales_total_kes.toLocaleString()}` },
-    { label: 'Average Order Value', value: `KSh ${data.average_order_value_kes.toLocaleString()}` },
+    { label: 'Total Orders', value: data.total_orders, link: '/admin/orders' },
+    { label: 'Paid Orders', value: data.paid_orders, link: '/admin/orders?status=paid' },
+    { label: 'Pending Orders', value: data.pending_orders, link: '/admin/orders?status=pending_payment' },
+    { label: 'Sales Total', value: `KSh ${data.sales_total_kes.toLocaleString()}`, link: null },
+    { label: 'Average Order Value', value: `KSh ${data.average_order_value_kes.toLocaleString()}`, link: null },
   ];
 
   return (
     <div>
       <h1>Dashboard</h1>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
-        {cards.map((c) => (
-          <div key={c.label} className="ss-card">
-            <p style={{ margin: 0, color: '#666', fontSize: '0.85rem' }}>{c.label}</p>
-            <p style={{ margin: '0.3rem 0 0', fontSize: '1.4rem', fontWeight: 700, color: 'var(--ss-green-dark)' }}>{c.value}</p>
-          </div>
-        ))}
+        {cards.map((c) => {
+          const content = (
+            <>
+              <p style={{ margin: 0, color: '#666', fontSize: '0.85rem' }}>{c.label}</p>
+              <p style={{ margin: '0.3rem 0 0', fontSize: '1.4rem', fontWeight: 700, color: 'var(--ss-green-dark)' }}>{c.value}</p>
+            </>
+          );
+          return c.link ? (
+            <Link key={c.label} to={c.link} className="ss-card" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+              {content}
+            </Link>
+          ) : (
+            <div key={c.label} className="ss-card">{content}</div>
+          );
+        })}
       </div>
 
       <h2>Top Products</h2>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import { adminApi } from '../api/adminClient';
 
@@ -6,8 +7,9 @@ const STATUSES = ['pending_payment', 'paid', 'processing', 'fulfilled', 'cancell
 
 export function AdminOrders() {
   const { token } = useAdminAuth();
+  const [searchParams] = useSearchParams();
   const [orders, setOrders] = useState<any[]>([]);
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState(searchParams.get('status') ?? '');
   const [selected, setSelected] = useState<any>(null);
   const [error, setError] = useState('');
 
