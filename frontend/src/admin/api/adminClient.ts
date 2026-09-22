@@ -20,8 +20,8 @@ export const adminApi = {
       body: JSON.stringify({ email, password }),
     }).then((r) => handle<{ token: string }>(r)),
 
-  getDashboard: (token: string) =>
-    fetch(`${API_BASE}/admin/dashboard`, { headers: authHeaders(token) }).then((r) => handle<any>(r)),
+  getDashboard: (token: string, range?: string) =>
+    fetch(`${API_BASE}/admin/dashboard${range ? `?range=${range}` : ''}`, { headers: authHeaders(token) }).then((r) => handle<any>(r)),
 
   listProducts: (token: string) =>
     fetch(`${API_BASE}/admin/products`, { headers: authHeaders(token) }).then((r) => handle<{ products: any[] }>(r)),
