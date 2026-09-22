@@ -130,9 +130,10 @@ export async function listAdminOrders(req: Request, res: Response) {
   const { status } = req.query;
   const conditions: string[] = [];
   const params: any[] = [];
-  if (status) {
-    params.push(status);
-    conditions.push(`o.status = $${params.length}`);
+  if (status && typeof status === 'string') {
+    const statusList = status.split(',').map((s) => s.trim()).filter(Boolean);
+    params.push(statusList);
+    conditions.push(`o.status = ANY($${params.length})`);
   }
 
   const query = `
