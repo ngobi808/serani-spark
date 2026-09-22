@@ -12,6 +12,11 @@ dotenv.config();
 
 const app = express();
 
+// Railway (and most PaaS platforms) sit behind a reverse proxy that sets
+// X-Forwarded-For. Without this, express-rate-limit throws on every request
+// to a rate-limited route, since it can't safely trust that header by default.
+app.set('trust proxy', 1);
+
 app.use(helmet());
 app.use(
   cors({
