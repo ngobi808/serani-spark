@@ -33,6 +33,8 @@ export function AdminOrders() {
   const [deletePassword, setDeletePassword] = useState('');
   const [deleteError, setDeleteError] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState('');
+  const [statusSaving, setStatusSaving] = useState(false);
 
   function load() {
     if (!token) return;
@@ -57,6 +59,7 @@ export function AdminOrders() {
     try {
       const detail = await adminApi.getOrderDetail(token, id);
       setSelected(detail);
+      setPendingStatus(detail.order.status);
       setDeleteOpen(false);
       setDeletePassword('');
       setDeleteError('');
@@ -82,14 +85,17 @@ export function AdminOrders() {
     }
   }
 
-  async function changeStatus(id: string, status: string) {
-    if (!token) return;
+  async function confirmStatusChange() {
+    if (!token || !selected) return;
+    setStatusSaving(true);
     try {
-      await adminApi.updateOrderStatus(token, id, status);
+      await adminApi.updateOrderStatus(token, selected.order.id, pendingStatus);
       load();
-      if (selected?.order.id === id) openOrder(id);
+      openOrder(selected.order.id);
     } catch (err: any) {
       setError(err.message);
+    } finally {
+      setStatusSaving(false);
     }
   }
 
@@ -152,10 +158,24 @@ export function AdminOrders() {
 
           <label>
             <strong>Status:</strong>{' '}
-            <select value={selected.order.status} onChange={(e) => changeStatus(selected.order.id, e.target.value)}>
+            <select value={pendingStatus} onChange={(e) => setPendingStatus(e.target.value)}>
               {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
           </label>
+          {pendingStatus !== selected.order.status && (
+            <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <button className="ss-btn-primary" onClick={confirmStatusChange} disabled={statusSaving} style={{ padding: '0.4rem 0.9rem', fontSize: '0.85rem' }}>
+                {statusSaving ? 'Saving...' : `Confirm: ${selected.order.status} → ${pendingStatus}`}
+              </button>
+              <button
+                onClick={() => setPendingStatus(selected.order.status)}
+                className="ss-btn-secondary"
+                style={{ padding: '0.4rem 0.9rem', fontSize: '0.85rem' }}
+              >
+                Cancel
+              </button>
+            </div>
+          )}
 
           <h3>Items</h3>
           <ul>
