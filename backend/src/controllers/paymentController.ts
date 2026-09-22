@@ -51,7 +51,9 @@ export async function startStkPush(req: Request, res: Response) {
 
     res.json({ message: 'STK push sent. Ask the customer to check their phone.', checkout_request_id: stkResponse.CheckoutRequestID });
   } catch (err: any) {
-    console.error('STK push failed', err?.response?.data ?? err);
+    console.error('STK push failed - message:', err?.message);
+    console.error('STK push failed - status:', err?.response?.status);
+    console.error('STK push failed - data:', JSON.stringify(err?.response?.data ?? {}));
     res.status(502).json({ error: 'Failed to initiate M-Pesa payment. Please try again.' });
   }
 }
