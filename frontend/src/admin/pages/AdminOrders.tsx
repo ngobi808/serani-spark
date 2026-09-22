@@ -10,6 +10,7 @@ export function AdminOrders() {
   const [searchParams] = useSearchParams();
   const [orders, setOrders] = useState<any[]>([]);
   const [statusFilter, setStatusFilter] = useState(searchParams.get('status') ?? '');
+  const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<any>(null);
   const [error, setError] = useState('');
 
@@ -19,6 +20,17 @@ export function AdminOrders() {
   }
 
   useEffect(load, [token, statusFilter]);
+
+  const filteredOrders = orders.filter((o) => {
+    if (!search) return true;
+    const term = search.toLowerCase();
+    return (
+      o.order_reference.toLowerCase().includes(term) ||
+      (o.business_name ?? '').toLowerCase().includes(term) ||
+      (o.contact_name ?? '').toLowerCase().includes(term) ||
+      (o.phone_number ?? '').includes(search)
+    );
+  });
 
   async function openOrder(id: string) {
     if (!token) return;
@@ -42,10 +54,25 @@ export function AdminOrders() {
   }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: selected ? '1fr 1fr' : '1fr', gap: '2rem' }}>
+    <div
+      style={{ display: 'grid', gridTemplateColumns: selected ? '1fr 1fr' : '1fr', gap: '2rem', minHeight: '70vh' }}
+      onClick={(e) => {
+        // Only close when the click lands directly on this background container itself,
+        // never when it bubbles up from an actual row, button, or input inside it.
+        if (e.target === e.currentTarget) setSelected(null);
+      }}
+    >
       <div>
         <h1>Orders</h1>
         {error && <p style={{ color: 'var(--ss-danger)' }}>{error}</p>}
+
+        <input
+          type="text"
+          placeholder="Search by order ref, customer, or phone..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{ width: '100%', padding: '0.5rem', marginBottom: '0.75rem' }}
+        />
 
         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} style={{ marginBottom: '1rem', padding: '0.4rem' }}>
           <option value="">All statuses</option>
@@ -64,7 +91,7 @@ export function AdminOrders() {
             </tr>
           </thead>
           <tbody>
-            {orders.map((o) => (
+            {filteredOrders.map((o) => (
               <tr key={o.id} onClick={() => openOrder(o.id)} style={{ borderBottom: '1px solid #eee', cursor: 'pointer' }}>
                 <td style={{ padding: '0.5rem' }}>{o.order_reference}</td>
                 <td style={{ padding: '0.5rem' }}>{o.business_name || o.contact_name}</td>
