@@ -50,6 +50,7 @@ export function AdminOrders() {
         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} style={{ marginBottom: '1rem', padding: '0.4rem' }}>
           <option value="">All statuses</option>
           <option value="paid,processing">Awaiting Fulfillment (paid or processing)</option>
+          <option value="paid,processing,fulfilled">All Revenue Orders (paid, processing or fulfilled)</option>
           {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
 
