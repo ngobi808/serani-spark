@@ -18,8 +18,9 @@ export function AdminDashboard() {
 
   const cards = [
     { label: 'Total Orders', value: data.total_orders, link: '/admin/orders' },
-    { label: 'Paid Orders', value: data.paid_orders, link: '/admin/orders?status=paid' },
-    { label: 'Pending Orders', value: data.pending_orders, link: '/admin/orders?status=pending_payment' },
+    { label: 'Pending Payment', value: data.pending_orders, link: '/admin/orders?status=pending_payment' },
+    { label: 'Awaiting Fulfillment', value: data.awaiting_fulfillment_orders, link: '/admin/orders?status=paid,processing' },
+    { label: 'Fulfilled', value: data.fulfilled_orders, link: '/admin/orders?status=fulfilled' },
     { label: 'Sales Total', value: `KSh ${data.sales_total_kes.toLocaleString()}`, link: null },
     { label: 'Average Order Value', value: `KSh ${data.average_order_value_kes.toLocaleString()}`, link: null },
   ];

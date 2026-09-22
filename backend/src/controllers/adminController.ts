@@ -34,14 +34,20 @@ export async function adminLogin(req: Request, res: Response) {
 
 /**
  * GET /api/admin/dashboard
- * MVP metrics only (per spec: total orders, paid orders, pending orders, sales total,
- * top-selling products, average order value). Deeper analytics deferred to Metabase.
+ * Metrics grouped by what they mean operationally, not just raw DB status:
+ * - pending: waiting on the customer to pay, no action needed from Serani Spark
+ * - awaiting_fulfillment: money received (paid or processing), delivery needs arranging
+ * - fulfilled: fully completed orders
+ * Sales figures always include paid + processing + fulfilled, since that's real revenue
+ * regardless of delivery stage.
  */
 export async function getDashboard(_req: Request, res: Response) {
   const counts = await pool.query(`
     SELECT
-      COUNT(*) FILTER (WHERE status = 'paid' OR status = 'processing' OR status = 'fulfilled') AS paid_orders,
       COUNT(*) FILTER (WHERE status = 'pending_payment') AS pending_orders,
+      COUNT(*) FILTER (WHERE status IN ('paid','processing')) AS awaiting_fulfillment_orders,
+      COUNT(*) FILTER (WHERE status = 'fulfilled') AS fulfilled_orders,
+      COUNT(*) FILTER (WHERE status IN ('paid','processing','fulfilled')) AS revenue_order_count,
       COUNT(*) AS total_orders,
       COALESCE(SUM(total_kes) FILTER (WHERE status IN ('paid','processing','fulfilled')), 0) AS sales_total
     FROM orders
@@ -59,15 +65,16 @@ export async function getDashboard(_req: Request, res: Response) {
   `);
 
   const row = counts.rows[0];
-  const paidOrders = Number(row.paid_orders);
+  const revenueOrderCount = Number(row.revenue_order_count);
   const salesTotal = Number(row.sales_total);
 
   res.json({
     total_orders: Number(row.total_orders),
-    paid_orders: paidOrders,
     pending_orders: Number(row.pending_orders),
+    awaiting_fulfillment_orders: Number(row.awaiting_fulfillment_orders),
+    fulfilled_orders: Number(row.fulfilled_orders),
     sales_total_kes: salesTotal,
-    average_order_value_kes: paidOrders > 0 ? Math.round((salesTotal / paidOrders) * 100) / 100 : 0,
+    average_order_value_kes: revenueOrderCount > 0 ? Math.round((salesTotal / revenueOrderCount) * 100) / 100 : 0,
     top_products: topProducts.rows.map((r) => ({
       name: r.name,
       units_sold: Number(r.units_sold),
