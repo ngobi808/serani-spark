@@ -14,17 +14,31 @@ async function getAccessToken(): Promise<string> {
     return cachedToken.token;
   }
 
-  const consumerKey = process.env.MPESA_CONSUMER_KEY!;
-  const consumerSecret = process.env.MPESA_CONSUMER_SECRET!;
+  const consumerKey = (process.env.MPESA_CONSUMER_KEY ?? '').trim();
+  const consumerSecret = (process.env.MPESA_CONSUMER_SECRET ?? '').trim();
+
+  console.log('Daraja OAuth attempt - consumerKey length:', consumerKey.length, 'consumerSecret length:', consumerSecret.length, 'BASE_URL:', BASE_URL);
+
+  if (!consumerKey || !consumerSecret) {
+    throw new Error('MPESA_CONSUMER_KEY or MPESA_CONSUMER_SECRET is missing/empty.');
+  }
+
   const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString('base64');
 
-  const { data } = await axios.get(`${BASE_URL}/oauth/v1/generate?grant_type=client_credentials`, {
-    headers: { Authorization: `Basic ${auth}` },
-  });
+  try {
+    const { data } = await axios.get(`${BASE_URL}/oauth/v1/generate?grant_type=client_credentials`, {
+      headers: { Authorization: `Basic ${auth}` },
+    });
 
-  // Daraja tokens last ~1 hour; refresh a little early.
-  cachedToken = { token: data.access_token, expiresAt: Date.now() + 55 * 60 * 1000 };
-  return data.access_token;
+    console.log('Daraja OAuth succeeded, token received.');
+
+    // Daraja tokens last ~1 hour; refresh a little early.
+    cachedToken = { token: data.access_token, expiresAt: Date.now() + 55 * 60 * 1000 };
+    return data.access_token;
+  } catch (err: any) {
+    console.error('Daraja OAuth FAILED - status:', err?.response?.status, 'data:', JSON.stringify(err?.response?.data ?? {}));
+    throw err;
+  }
 }
 
 function generateTimestamp(): string {
@@ -47,10 +61,17 @@ interface StkPushParams {
 }
 
 export async function initiateStkPush({ phoneNumber, amount, orderReference }: StkPushParams) {
-  const shortcode = process.env.MPESA_SHORTCODE!;
-  const passkey = process.env.MPESA_PASSKEY!;
+  const shortcode = (process.env.MPESA_SHORTCODE ?? '').trim();
+  const passkey = (process.env.MPESA_PASSKEY ?? '').trim();
+  const callbackUrl = (process.env.MPESA_CALLBACK_URL ?? '').trim();
   const timestamp = generateTimestamp();
   const password = Buffer.from(`${shortcode}${passkey}${timestamp}`).toString('base64');
+
+  console.log('STK push attempt - shortcode:', shortcode, 'passkey length:', passkey.length, 'callbackUrl:', callbackUrl, 'phoneNumber:', phoneNumber, 'amount:', Math.round(amount));
+
+  if (!shortcode || !passkey || !callbackUrl) {
+    throw new Error('MPESA_SHORTCODE, MPESA_PASSKEY, or MPESA_CALLBACK_URL is missing/empty.');
+  }
 
   const token = await getAccessToken();
 
@@ -65,7 +86,7 @@ export async function initiateStkPush({ phoneNumber, amount, orderReference }: S
       PartyA: phoneNumber,
       PartyB: shortcode,
       PhoneNumber: phoneNumber,
-      CallBackURL: process.env.MPESA_CALLBACK_URL,
+      CallBackURL: callbackUrl,
       AccountReference: orderReference,
       TransactionDesc: `Payment for order ${orderReference}`,
     },
