@@ -3,7 +3,7 @@ import rateLimit from 'express-rate-limit';
 import { requireAdmin } from '../middleware/auth';
 import { adminLogin, getDashboard } from '../controllers/adminController';
 import {
-  listAdminProducts, createProduct, updateProduct, deactivateProduct, bulkStockTake,
+  listAdminProducts, createProduct, updateProduct, deactivateProduct, bulkStockTake, getAdminProductDetail,
 } from '../controllers/productController';
 import {
   listAdminOrders, getAdminOrderDetail, updateOrderStatus,
@@ -20,6 +20,7 @@ router.use(requireAdmin); // everything below requires a valid JWT
 router.get('/dashboard', getDashboard);
 
 router.get('/products', listAdminProducts);
+router.get('/products/:id/detail', getAdminProductDetail);
 router.post('/products', createProduct);
 router.put('/products/stock-take', bulkStockTake);
 router.put('/products/:id', updateProduct);

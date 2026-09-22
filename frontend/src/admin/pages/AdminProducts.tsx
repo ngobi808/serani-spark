@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import { adminApi } from '../api/adminClient';
 
@@ -17,11 +18,23 @@ export function AdminProducts() {
   const [saving, setSaving] = useState(false);
   const [pendingStock, setPendingStock] = useState<Record<string, number>>({});
   const [savingBatch, setSavingBatch] = useState(false);
+  const [search, setSearch] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
 
   function load() {
     if (!token) return;
     adminApi.listProducts(token).then((res) => setProducts(res.products)).catch((err) => setError(err.message));
   }
+
+  const categories = Array.from(new Set(products.map((p) => p.category))).sort();
+
+  const filteredProducts = products.filter((p) => {
+    const matchesSearch = !search ||
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      (p.sku ?? '').toLowerCase().includes(search.toLowerCase());
+    const matchesCategory = !categoryFilter || p.category === categoryFilter;
+    return matchesSearch && matchesCategory;
+  });
 
   useEffect(load, [token]);
 
@@ -146,6 +159,20 @@ export function AdminProducts() {
         </div>
       </form>
 
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+        <input
+          type="text"
+          placeholder="Search by name or SKU..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{ padding: '0.5rem', flex: 1, minWidth: 200 }}
+        />
+        <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} style={{ padding: '0.5rem' }}>
+          <option value="">All categories</option>
+          {categories.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
+        </select>
+      </div>
+
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr style={{ textAlign: 'left', borderBottom: '2px solid #ddd' }}>
@@ -159,11 +186,14 @@ export function AdminProducts() {
           </tr>
         </thead>
         <tbody>
-          {products.map((p) => {
+          {filteredProducts.map((p) => {
             const margin = p.cost_price_kes ? Math.round(((p.selling_price_kes - p.cost_price_kes) / p.selling_price_kes) * 1000) / 10 : null;
             return (
               <tr key={p.id} style={{ borderBottom: '1px solid #eee', opacity: p.is_active ? 1 : 0.4 }}>
-                <td style={{ padding: '0.5rem' }}>{p.name}{!p.is_active && ' (inactive)'}</td>
+                <td style={{ padding: '0.5rem' }}>
+                  <Link to={`/admin/products/${p.id}`} style={{ color: 'var(--ss-green-dark)', fontWeight: 600 }}>{p.name}</Link>
+                  {!p.is_active && ' (inactive)'}
+                </td>
                 <td style={{ padding: '0.5rem' }}>KSh {Number(p.selling_price_kes).toLocaleString()}</td>
                 <td style={{ padding: '0.5rem' }}>{p.cost_price_kes ? `KSh ${Number(p.cost_price_kes).toLocaleString()}` : '—'}</td>
                 <td style={{ padding: '0.5rem' }}>{margin !== null ? `${margin}%` : '—'}</td>

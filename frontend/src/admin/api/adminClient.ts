@@ -42,6 +42,9 @@ export const adminApi = {
       body: JSON.stringify({ updates, reason }),
     }).then((r) => handle<{ message: string; changed: number; unchanged: number }>(r)),
 
+  getProductDetail: (token: string, id: string) =>
+    fetch(`${API_BASE}/admin/products/${id}/detail`, { headers: authHeaders(token) }).then((r) => handle<any>(r)),
+
   listOrders: (token: string, status?: string) => {
     const q = status ? `?status=${status}` : '';
     return fetch(`${API_BASE}/admin/orders${q}`, { headers: authHeaders(token) }).then((r) => handle<{ orders: any[] }>(r));

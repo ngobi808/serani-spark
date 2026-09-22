@@ -251,3 +251,77 @@ export async function bulkStockTake(req: AuthedRequest, res: Response) {
     client.release();
   }
 }
+
+/**
+ * GET /api/admin/products/:id/detail — ADMIN ONLY.
+ * Sales history, profit (using the price/cost snapshotted per order_item, so this
+ * stays accurate even if the product's current prices have since changed), stock
+ * adjustment history, and recent orders that included this product.
+ */
+export async function getAdminProductDetail(req: Request, res: Response) {
+  const { id } = req.params;
+  const revenueStatuses = ['paid', 'processing', 'fulfilled'];
+
+  const productResult = await pool.query(`SELECT * FROM products WHERE id = $1`, [id]);
+  if (productResult.rowCount === 0) {
+    return res.status(404).json({ error: 'Product not found.' });
+  }
+
+  const summaryResult = await pool.query(
+    `SELECT
+       COALESCE(SUM(oi.quantity), 0) AS total_units_sold,
+       COALESCE(SUM(oi.quantity * oi.unit_price_kes), 0) AS total_revenue_kes,
+       COALESCE(SUM(oi.quantity * (oi.unit_price_kes - COALESCE(oi.unit_cost_kes, 0))), 0) AS total_profit_kes
+     FROM order_items oi
+     JOIN orders o ON o.id = oi.order_id
+     WHERE oi.product_id = $1 AND o.status = ANY($2)`,
+    [id, revenueStatuses]
+  );
+
+  const monthlyResult = await pool.query(
+    `SELECT to_char(o.created_at, 'YYYY-MM') AS month,
+            SUM(oi.quantity) AS units_sold,
+            SUM(oi.quantity * oi.unit_price_kes) AS revenue_kes
+     FROM order_items oi
+     JOIN orders o ON o.id = oi.order_id
+     WHERE oi.product_id = $1 AND o.status = ANY($2)
+     GROUP BY month ORDER BY month DESC LIMIT 12`,
+    [id, revenueStatuses]
+  );
+
+  const stockHistoryResult = await pool.query(
+    `SELECT sa.created_at, sa.previous_quantity, sa.new_quantity, sa.difference, sa.reason, au.email AS admin_email
+     FROM stock_adjustments sa
+     LEFT JOIN admin_users au ON au.id = sa.admin_id
+     WHERE sa.product_id = $1
+     ORDER BY sa.created_at DESC LIMIT 20`,
+    [id]
+  );
+
+  const ordersResult = await pool.query(
+    `SELECT o.order_reference, o.status, o.created_at, oi.quantity, oi.unit_price_kes
+     FROM order_items oi
+     JOIN orders o ON o.id = oi.order_id
+     WHERE oi.product_id = $1
+     ORDER BY o.created_at DESC LIMIT 20`,
+    [id]
+  );
+
+  const summary = summaryResult.rows[0];
+
+  res.json({
+    product: productResult.rows[0],
+    sales_summary: {
+      total_units_sold: Number(summary.total_units_sold),
+      total_revenue_kes: Number(summary.total_revenue_kes),
+      total_profit_kes: Number(summary.total_profit_kes),
+    },
+    monthly_sales: monthlyResult.rows.map((r) => ({
+      month: r.month,
+      units_sold: Number(r.units_sold),
+      revenue_kes: Number(r.revenue_kes),
+    })),
+    stock_history: stockHistoryResult.rows,
+    orders: ordersResult.rows.map((r) => ({ ...r, unit_price_kes: Number(r.unit_price_kes) })),
+  });
+}

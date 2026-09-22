@@ -11,6 +11,7 @@ import { AdminLayout } from './admin/components/AdminLayout';
 import { AdminLogin } from './admin/pages/AdminLogin';
 import { AdminDashboard } from './admin/pages/AdminDashboard';
 import { AdminProducts } from './admin/pages/AdminProducts';
+import { AdminProductDetail } from './admin/pages/AdminProductDetail';
 import { AdminStockTake } from './admin/pages/AdminStockTake';
 import { AdminOrders } from './admin/pages/AdminOrders';
 import './styles/theme.css';
@@ -52,6 +53,7 @@ export default function App() {
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="products" element={<AdminProducts />} />
+          <Route path="products/:id" element={<AdminProductDetail />} />
           <Route path="stock-take" element={<AdminStockTake />} />
           <Route path="orders" element={<AdminOrders />} />
         </Route>
