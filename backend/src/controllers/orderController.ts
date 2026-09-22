@@ -1,8 +1,10 @@
 import { Request, Response } from 'express';
+import bcrypt from 'bcryptjs';
 import { pool } from '../config/db';
 import { reserveStockForOrder, InsufficientStockError, BelowMoqError, releaseReservationsForOrder } from '../services/stockService';
 import { generateOrderReference } from '../utils/orderReference';
 import { MPESA_TRANSACTION_CEILING_KES } from '../services/mpesaService';
+import { AuthedRequest } from '../middleware/auth';
 
 /**
  * POST /api/orders
@@ -125,7 +127,7 @@ export async function getOrderStatus(req: Request, res: Response) {
   res.json({ ...order, total_kes: Number(order.total_kes), amount_paid_kes: Number(order.amount_paid_kes) });
 }
 
-/** GET /api/admin/orders — ADMIN ONLY. */
+/** GET /api/admin/orders — ADMIN ONLY. status can be a single value or comma-separated list. */
 export async function listAdminOrders(req: Request, res: Response) {
   const { status } = req.query;
   const conditions: string[] = [];
@@ -202,4 +204,41 @@ export async function updateOrderStatus(req: Request, res: Response) {
     return res.status(404).json({ error: 'Order not found.' });
   }
   res.json(result.rows[0]);
+}
+
+/**
+ * DELETE /api/admin/orders/:id — ADMIN ONLY.
+ * Permanently deletes an order and everything attached to it (order_items,
+ * payments, stock_reservations all cascade automatically via foreign keys).
+ * Requires the logged-in admin to re-enter their own current password as
+ * confirmation — this is irreversible, so a click alone is not enough.
+ * Deleting a pending/failed order correctly frees any stock it was holding,
+ * since its reservation row is removed along with it. Deleting an order whose
+ * stock was already permanently committed (paid/fulfilled) does NOT restore
+ * stock_quantity, because those physical goods genuinely already left.
+ */
+export async function deleteOrder(req: AuthedRequest, res: Response) {
+  const { id } = req.params;
+  const { password } = req.body;
+
+  if (!password) {
+    return res.status(400).json({ error: 'Your password is required to confirm deletion.' });
+  }
+
+  const adminResult = await pool.query(`SELECT password_hash FROM admin_users WHERE id = $1`, [req.adminId]);
+  if (adminResult.rowCount === 0) {
+    return res.status(401).json({ error: 'Admin account not found.' });
+  }
+
+  const valid = await bcrypt.compare(password, adminResult.rows[0].password_hash);
+  if (!valid) {
+    return res.status(401).json({ error: 'Incorrect password.' });
+  }
+
+  const result = await pool.query(`DELETE FROM orders WHERE id = $1 RETURNING order_reference`, [id]);
+  if (result.rowCount === 0) {
+    return res.status(404).json({ error: 'Order not found.' });
+  }
+
+  res.json({ message: `Order ${result.rows[0].order_reference} permanently deleted.` });
 }

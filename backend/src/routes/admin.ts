@@ -6,7 +6,7 @@ import {
   listAdminProducts, createProduct, updateProduct, deactivateProduct, bulkStockTake, getAdminProductDetail,
 } from '../controllers/productController';
 import {
-  listAdminOrders, getAdminOrderDetail, updateOrderStatus,
+  listAdminOrders, getAdminOrderDetail, updateOrderStatus, deleteOrder,
 } from '../controllers/orderController';
 
 const router = Router();
@@ -29,5 +29,6 @@ router.delete('/products/:id', deactivateProduct);            // soft delete (de
 router.get('/orders', listAdminOrders);
 router.get('/orders/:id', getAdminOrderDetail);
 router.put('/orders/:id', updateOrderStatus);
+router.delete('/orders/:id', deleteOrder);
 
 export default router;

@@ -5,6 +5,22 @@ import { adminApi } from '../api/adminClient';
 
 const STATUSES = ['pending_payment', 'paid', 'processing', 'fulfilled', 'cancelled', 'failed'];
 
+const FILTER_TITLES: Record<string, string> = {
+  '': 'All Orders',
+  'pending_payment': 'Pending Payment',
+  'paid,processing': 'Awaiting Fulfillment',
+  'paid,processing,fulfilled': 'All Revenue Orders',
+  'paid': 'Paid',
+  'processing': 'Processing',
+  'fulfilled': 'Fulfilled',
+  'cancelled': 'Cancelled',
+  'failed': 'Failed',
+};
+
+function titleForFilter(statusFilter: string): string {
+  return FILTER_TITLES[statusFilter] ?? 'Orders';
+}
+
 export function AdminOrders() {
   const { token } = useAdminAuth();
   const [searchParams] = useSearchParams();
@@ -13,6 +29,10 @@ export function AdminOrders() {
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<any>(null);
   const [error, setError] = useState('');
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteError, setDeleteError] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   function load() {
     if (!token) return;
@@ -37,8 +57,28 @@ export function AdminOrders() {
     try {
       const detail = await adminApi.getOrderDetail(token, id);
       setSelected(detail);
+      setDeleteOpen(false);
+      setDeletePassword('');
+      setDeleteError('');
     } catch (err: any) {
       setError(err.message);
+    }
+  }
+
+  async function handleDeleteOrder() {
+    if (!token || !selected) return;
+    setDeleting(true);
+    setDeleteError('');
+    try {
+      await adminApi.deleteOrder(token, selected.order.id, deletePassword);
+      setSelected(null);
+      setDeleteOpen(false);
+      setDeletePassword('');
+      load();
+    } catch (err: any) {
+      setDeleteError(err.message);
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -63,7 +103,7 @@ export function AdminOrders() {
       }}
     >
       <div>
-        <h1>Orders</h1>
+        <h1>{titleForFilter(statusFilter)}</h1>
         {error && <p style={{ color: 'var(--ss-danger)' }}>{error}</p>}
 
         <input
@@ -145,6 +185,47 @@ export function AdminOrders() {
           >
             Open WhatsApp
           </a>
+
+          <div style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid #eee' }}>
+            {!deleteOpen ? (
+              <button
+                onClick={() => setDeleteOpen(true)}
+                style={{ background: 'transparent', color: 'var(--ss-danger)', border: '1px solid var(--ss-danger)', borderRadius: 8, padding: '0.5rem 1rem', cursor: 'pointer' }}
+              >
+                Delete This Order
+              </button>
+            ) : (
+              <div style={{ background: '#fdf1f0', border: '1px solid var(--ss-danger)', borderRadius: 8, padding: '1rem' }}>
+                <p style={{ margin: '0 0 0.5rem', fontWeight: 600, color: 'var(--ss-danger)' }}>
+                  This permanently deletes order {selected.order.order_reference}. This cannot be undone.
+                </p>
+                <p style={{ margin: '0 0 0.75rem', fontSize: '0.9rem' }}>Enter your admin password to confirm:</p>
+                {deleteError && <p style={{ color: 'var(--ss-danger)', fontSize: '0.9rem' }}>{deleteError}</p>}
+                <input
+                  type="password"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  placeholder="Your password"
+                  style={{ width: '100%', padding: '0.5rem', marginBottom: '0.75rem' }}
+                />
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                  <button
+                    onClick={handleDeleteOrder}
+                    disabled={deleting || !deletePassword}
+                    style={{ background: 'var(--ss-danger)', color: 'white', border: 'none', borderRadius: 8, padding: '0.5rem 1rem', cursor: 'pointer', opacity: deleting || !deletePassword ? 0.6 : 1 }}
+                  >
+                    {deleting ? 'Deleting...' : 'Confirm Delete'}
+                  </button>
+                  <button
+                    onClick={() => { setDeleteOpen(false); setDeletePassword(''); setDeleteError(''); }}
+                    className="ss-btn-secondary"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

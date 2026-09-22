@@ -55,4 +55,7 @@ export const adminApi = {
 
   updateOrderStatus: (token: string, id: string, status: string) =>
     fetch(`${API_BASE}/admin/orders/${id}`, { method: 'PUT', headers: authHeaders(token), body: JSON.stringify({ status }) }).then((r) => handle<any>(r)),
+
+  deleteOrder: (token: string, id: string, password: string) =>
+    fetch(`${API_BASE}/admin/orders/${id}`, { method: 'DELETE', headers: authHeaders(token), body: JSON.stringify({ password }) }).then((r) => handle<{ message: string }>(r)),
 };
