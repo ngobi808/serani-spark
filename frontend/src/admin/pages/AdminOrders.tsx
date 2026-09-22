@@ -97,7 +97,11 @@ export function AdminOrders() {
           {selected.payments.length === 0 ? <p>No payment attempts yet.</p> : (
             <ul>
               {selected.payments.map((p: any, i: number) => (
-                <li key={i}>{p.status} — KSh {Number(p.amount_kes).toLocaleString()} {p.mpesa_receipt_number && `(receipt: ${p.mpesa_receipt_number})`}</li>
+                <li key={i}>
+                  {p.status} — KSh {Number(p.amount_kes).toLocaleString()}
+                  {p.mpesa_receipt_number && ` (receipt: ${p.mpesa_receipt_number})`}
+                  {p.result_desc && <div style={{ color: '#666', fontSize: '0.85rem', marginTop: '0.2rem' }}>Safaricom said: "{p.result_desc}"</div>}
+                </li>
               ))}
             </ul>
           )}
