@@ -1,4 +1,4 @@
-import { Navigate, NavLink, Outlet } from 'react-router-dom';
+import { Navigate, NavLink, Link, Outlet } from 'react-router-dom';
 import { useAdminAuth } from '../context/AdminAuthContext';
 
 export function AdminLayout() {
@@ -17,12 +17,11 @@ export function AdminLayout() {
   return (
     <div>
       <header className="ss-header">
-        <span className="logo">Serani Spark Admin</span>
+        <Link to="/admin/dashboard" className="logo" style={{ textDecoration: 'none' }}>Serani Spark Admin</Link>
         <nav style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
           <NavLink to="/admin/dashboard" style={linkStyle}>Dashboard</NavLink>
           <NavLink to="/admin/products" style={linkStyle}>Products</NavLink>
           <NavLink to="/admin/stock-take" style={linkStyle}>Stock Take</NavLink>
-          <NavLink to="/admin/orders" style={linkStyle}>Orders</NavLink>
           <button
             onClick={logout}
             style={{ background: 'transparent', border: '1px solid var(--ss-gold)', color: 'var(--ss-gold)', padding: '0.4rem 0.8rem', borderRadius: 8, cursor: 'pointer' }}
