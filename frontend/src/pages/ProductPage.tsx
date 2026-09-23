@@ -40,7 +40,7 @@ export function ProductPage() {
         <h1>{product.name}</h1>
         <p style={{ color: '#555' }}>{product.description}</p>
         <p><strong>Packaging:</strong> {product.packaging_unit}{product.units_per_package ? ` (${product.units_per_package} units each)` : ''}</p>
-        <p><strong>MOQ:</strong> {product.moq} {product.packaging_unit}(s)</p>
+        {product.moq > 1 && <p><strong>MOQ:</strong> {product.moq} {product.packaging_unit}(s)</p>}
         <p style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--ss-green-dark)' }}>
           KSh {product.price_kes.toLocaleString()} <span style={{ fontSize: '0.9rem', fontWeight: 400 }}>per {product.packaging_unit}</span>
         </p>

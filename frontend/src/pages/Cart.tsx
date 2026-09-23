@@ -18,10 +18,10 @@ export function Cart() {
     <div className="ss-container">
       <h1>Your Cart</h1>
       {lines.map((line) => (
-        <div key={line.product.id} className="ss-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+        <div key={line.product.id} className="ss-card" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', gap: '0.75rem' }}>
           <Link
             to={`/products/${line.product.id}`}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.9rem', textDecoration: 'none', color: 'inherit', flex: 1, minWidth: 0 }}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.9rem', textDecoration: 'none', color: 'inherit', flex: '1 1 220px', minWidth: 220 }}
           >
             <img
               src={line.product.image_urls[0] || 'https://placehold.co/80x80?text=SS'}
@@ -31,11 +31,11 @@ export function Cart() {
             <div style={{ minWidth: 0 }}>
               <strong>{line.product.name}</strong>
               <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>
-                KSh {line.product.price_kes.toLocaleString()} per {line.product.packaging_unit} · MOQ {line.product.moq}
+                KSh {line.product.price_kes.toLocaleString()} per {line.product.packaging_unit}{line.product.moq > 1 ? ` · MOQ ${line.product.moq}` : ''}
               </p>
             </div>
           </Link>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
             <input
               type="number"
               min={line.product.moq}

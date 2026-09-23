@@ -28,7 +28,7 @@ export function ProductCard({ product }: { product: PublicProduct }) {
       />
       <h3 style={{ margin: '0 0 0.25rem', fontSize: '1.1rem' }}>{product.name}</h3>
       <p style={{ margin: '0 0 0.4rem', color: '#555', fontSize: '0.9rem' }}>
-        Per {product.packaging_unit} · MOQ {product.moq}
+        Per {product.packaging_unit}{product.moq > 1 ? ` · MOQ ${product.moq}` : ''}
       </p>
       <p style={{ margin: '0 0 0.5rem', fontWeight: 700, color: 'var(--ss-green-dark)' }}>
         KSh {product.price_kes.toLocaleString()}

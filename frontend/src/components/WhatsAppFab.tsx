@@ -1,4 +1,4 @@
-const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '254700000000';
+const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '254116851988';
 
 export function WhatsAppFab({ orderReference }: { orderReference?: string }) {
   const message = orderReference

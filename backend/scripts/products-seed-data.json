@@ -27,7 +27,7 @@
     "moq": 1,
     "stock_quantity": 15,
     "image_urls": [
-      "https://res.cloudinary.com/alrdhy5k/image/upload/v1789996012/Hanan_Unwrapped_Tissue.jpg"
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187176/Hanan_Unwrapped_Tissue_900_1300.jpg"
     ],
     "is_active": true
   },
@@ -88,7 +88,9 @@
     "cost_price_kes": 1275,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187177/SoftLeaf_Tissue_Paper.jpg"
+    ],
     "is_active": true
   },
   {
@@ -102,7 +104,9 @@
     "cost_price_kes": 2880,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187176/Bloom_Luxury_3_Ply.jpg"
+    ],
     "is_active": true
   },
   {
@@ -116,7 +120,9 @@
     "cost_price_kes": 1180,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187177/Neptune_Tissue_Paper.webp"
+    ],
     "is_active": true
   },
   {
@@ -130,7 +136,9 @@
     "cost_price_kes": 2595,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187175/Livelle_Kitchen_Rolls_Bale_of_20.jpg"
+    ],
     "is_active": true
   },
   {
@@ -144,7 +152,9 @@
     "cost_price_kes": 1167,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187177/Bella_Wet_Wipes.jpg"
+    ],
     "is_active": true
   },
   {
@@ -172,7 +182,9 @@
     "cost_price_kes": 3143,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187178/Hanan_Flushable_Wipes.jpg"
+    ],
     "is_active": true
   },
   {
@@ -200,7 +212,9 @@
     "cost_price_kes": 3143,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187178/Hanan_Sensitive_Wipes.jpg"
+    ],
     "is_active": true
   },
   {
@@ -214,7 +228,9 @@
     "cost_price_kes": 3143,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187178/Hanan_Antibacterial_Wipes.jpg"
+    ],
     "is_active": true
   },
   {
@@ -228,7 +244,9 @@
     "cost_price_kes": 3143,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187178/Hanan_Wet_Wipes_Classic_Blue.jpg"
+    ],
     "is_active": true
   },
   {
@@ -256,7 +274,9 @@
     "cost_price_kes": 1625,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187177/Fay_Everyday_Wipes.jpg"
+    ],
     "is_active": true
   },
   {
@@ -270,7 +290,9 @@
     "cost_price_kes": 1625,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187178/Fay_Sensitive_Wipes.jpg"
+    ],
     "is_active": true
   },
   {
@@ -284,7 +306,9 @@
     "cost_price_kes": 280,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187175/Hannah_3-in-1_Kitchen_Rolls.jpg"
+    ],
     "is_active": true
   },
   {
@@ -298,7 +322,9 @@
     "cost_price_kes": 64,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187176/Hanan_Facial_Tissues_Assorted_Promo.jpg"
+    ],
     "is_active": true
   },
   {
@@ -312,7 +338,9 @@
     "cost_price_kes": 1200,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187176/Celine_Jumbo_Tissue.jpg"
+    ],
     "is_active": true
   },
   {
@@ -326,7 +354,9 @@
     "cost_price_kes": 2160,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187174/Celine_Hand_Paper_Towel.jpg"
+    ],
     "is_active": true
   },
   {
@@ -340,7 +370,9 @@
     "cost_price_kes": 2000,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187175/Livelle_Kitchen_Rolls_Bale_of_10.jpg"
+    ],
     "is_active": true
   },
   {
@@ -354,7 +386,9 @@
     "cost_price_kes": 1450,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187177/Celine_Premium_Serviettes.jpg"
+    ],
     "is_active": true
   },
   {
@@ -368,7 +402,9 @@
     "cost_price_kes": 1200,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187177/Livelle_Premium_Serviettes.jpg"
+    ],
     "is_active": true
   },
   {
@@ -382,7 +418,9 @@
     "cost_price_kes": 1800,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187175/Hanan_Hand_Towels.jpg"
+    ],
     "is_active": true
   },
   {
@@ -396,7 +434,9 @@
     "cost_price_kes": 130,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187174/Daneel_Hand_Towels.jpg"
+    ],
     "is_active": true
   },
   {
@@ -410,7 +450,9 @@
     "cost_price_kes": 2425,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187175/Celine_Professional_Medispread.jpg"
+    ],
     "is_active": true
   },
   {
@@ -424,7 +466,9 @@
     "cost_price_kes": 40,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187176/Exfoliating_Gloves.webp"
+    ],
     "is_active": true
   },
   {
@@ -438,7 +482,9 @@
     "cost_price_kes": 1183,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187179/Sunlight_3.5kg_Handwash.jpg"
+    ],
     "is_active": true
   },
   {
@@ -452,7 +498,9 @@
     "cost_price_kes": 1125,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187179/Sunlight_3.5kg_Auto.jpg"
+    ],
     "is_active": true
   },
   {
@@ -466,7 +514,9 @@
     "cost_price_kes": 268,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187178/Sunlight_Auto_700g.webp"
+    ],
     "is_active": true
   },
   {
@@ -480,7 +530,9 @@
     "cost_price_kes": 305,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187178/Sunlight_Handwash_1kg_PinkYellowLavender.jpg"
+    ],
     "is_active": true
   },
   {
@@ -508,7 +560,9 @@
     "cost_price_kes": 362,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187175/Dove_Roll-on.jpg"
+    ],
     "is_active": true
   },
   {
@@ -522,7 +576,9 @@
     "cost_price_kes": 112,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187176/Kotex_Ultra_Thin_Super.jpg"
+    ],
     "is_active": true
   },
   {
@@ -536,7 +592,9 @@
     "cost_price_kes": 112,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187176/Kotex_Maxi_Pads.jpg"
+    ],
     "is_active": true
   },
   {
@@ -550,7 +608,9 @@
     "cost_price_kes": 723,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187174/Fay_Aluminium_Foil_45cm_x_30m.jpg"
+    ],
     "is_active": true
   },
   {
@@ -564,7 +624,9 @@
     "cost_price_kes": 1609,
     "moq": 1,
     "stock_quantity": 15,
-    "image_urls": [],
+    "image_urls": [
+      "https://res.cloudinary.com/alrdhy5k/image/upload/v1790187175/Fay_Aluminium_Foil_45cm_x_90m.jpg"
+    ],
     "is_active": true
   },
   {
