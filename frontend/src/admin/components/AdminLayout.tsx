@@ -17,8 +17,9 @@ export function AdminLayout() {
   return (
     <div>
       <header className="ss-header">
-        <Link to="/admin/dashboard" style={{ display: 'flex', alignItems: 'center' }}>
+        <Link to="/admin/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', textDecoration: 'none' }}>
           <img src="/logo.svg" alt="Serani Spark Admin" style={{ height: 44, width: 'auto' }} />
+          <span className="logo">Serani Spark Admin</span>
         </Link>
         <nav style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
           <NavLink to="/admin/dashboard" style={linkStyle}>Dashboard</NavLink>
