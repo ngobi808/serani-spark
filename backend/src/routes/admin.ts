@@ -8,6 +8,9 @@ import {
 import {
   listAdminOrders, getAdminOrderDetail, updateOrderStatus, deleteOrder,
 } from '../controllers/orderController';
+import {
+  listDiscountCodes, createDiscountCode, updateDiscountCode,
+} from '../controllers/discountController';
 
 const router = Router();
 
@@ -30,5 +33,9 @@ router.get('/orders', listAdminOrders);
 router.get('/orders/:id', getAdminOrderDetail);
 router.put('/orders/:id', updateOrderStatus);
 router.delete('/orders/:id', deleteOrder);
+
+router.get('/discount-codes', listDiscountCodes);
+router.post('/discount-codes', createDiscountCode);
+router.put('/discount-codes/:id', updateDiscountCode);
 
 export default router;

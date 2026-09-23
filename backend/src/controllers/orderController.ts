@@ -5,6 +5,7 @@ import { reserveStockForOrder, InsufficientStockError, BelowMoqError, releaseRes
 import { generateOrderReference } from '../utils/orderReference';
 import { MPESA_TRANSACTION_CEILING_KES } from '../services/mpesaService';
 import { AuthedRequest } from '../middleware/auth';
+import { validateAndComputeDiscount, incrementDiscountCodeUsage, InvalidDiscountCodeError } from './discountController';
 
 /**
  * POST /api/orders
@@ -16,7 +17,7 @@ import { AuthedRequest } from '../middleware/auth';
 export async function createOrder(req: Request, res: Response) {
   const {
     business_name, contact_name, phone_number, mpesa_phone_number,
-    delivery_zone, address, landmark, city_or_county, items,
+    delivery_zone, address, landmark, city_or_county, items, discount_code,
   } = req.body;
 
   if (!contact_name || !phone_number || !mpesa_phone_number || !Array.isArray(items) || items.length === 0) {
@@ -53,7 +54,22 @@ export async function createOrder(req: Request, res: Response) {
       });
     }
 
-    // 2. Create customer record (guest checkout — no account/login).
+    // 2. Apply discount code, if provided — validated inside the same transaction
+    //    so a code hitting its usage limit can't be double-spent by two
+    //    simultaneous checkouts.
+    let discountAmount = 0;
+    let appliedCode: string | null = null;
+    let discountId: string | null = null;
+
+    if (discount_code) {
+      const discount = await validateAndComputeDiscount(client, discount_code, total);
+      discountAmount = discount.discountAmountKes;
+      appliedCode = discount.codeUpper;
+      discountId = discount.discountId;
+      total = Math.round((total - discountAmount) * 100) / 100;
+    }
+
+    // 3. Create customer record (guest checkout — no account/login).
     const customerResult = await client.query(
       `INSERT INTO customers (business_name, contact_name, phone_number, mpesa_phone_number, delivery_zone, address, landmark, city_or_county)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id`,
@@ -61,22 +77,27 @@ export async function createOrder(req: Request, res: Response) {
     );
     const customerId = customerResult.rows[0].id;
 
-    // 3. Create the order in pending_payment state.
+    // 4. Create the order in pending_payment state.
     const orderReference = await generateOrderReference();
     const orderResult = await client.query(
-      `INSERT INTO orders (order_reference, customer_id, status, total_kes)
-       VALUES ($1, $2, 'pending_payment', $3) RETURNING id, order_reference, total_kes, status, created_at`,
-      [orderReference, customerId, total]
+      `INSERT INTO orders (order_reference, customer_id, status, total_kes, discount_code, discount_amount_kes)
+       VALUES ($1, $2, 'pending_payment', $3, $4, $5) RETURNING id, order_reference, total_kes, status, created_at, discount_code, discount_amount_kes`,
+      [orderReference, customerId, total, appliedCode, discountAmount]
     );
     const order = orderResult.rows[0];
 
-    // 4. Insert order_items (price snapshot).
+    // 5. Insert order_items (price snapshot).
     for (const li of lineItems) {
       await client.query(
         `INSERT INTO order_items (order_id, product_id, quantity, unit_price_kes, unit_cost_kes)
          VALUES ($1,$2,$3,$4,$5)`,
         [order.id, li.product_id, li.quantity, li.unit_price_kes, li.unit_cost_kes]
       );
+    }
+
+    // Only actually count the code as "used" once we're committing to a real order.
+    if (discountId) {
+      await incrementDiscountCodeUsage(client, discountId);
     }
 
     await client.query('COMMIT');
@@ -100,12 +121,19 @@ export async function createOrder(req: Request, res: Response) {
     const exceedsCeiling = total > MPESA_TRANSACTION_CEILING_KES;
 
     res.status(201).json({
-      order: { ...order, total_kes: Number(order.total_kes) },
+      order: {
+        ...order,
+        total_kes: Number(order.total_kes),
+        discount_amount_kes: Number(order.discount_amount_kes),
+      },
       exceeds_mpesa_ceiling: exceedsCeiling,
       whatsapp_required: exceedsCeiling,
     });
   } catch (err) {
     await client.query('ROLLBACK');
+    if (err instanceof InvalidDiscountCodeError) {
+      return res.status(400).json({ error: err.message });
+    }
     console.error('createOrder error', err);
     res.status(500).json({ error: 'Failed to create order.' });
   } finally {

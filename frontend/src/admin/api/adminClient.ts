@@ -58,4 +58,13 @@ export const adminApi = {
 
   deleteOrder: (token: string, id: string, password: string) =>
     fetch(`${API_BASE}/admin/orders/${id}`, { method: 'DELETE', headers: authHeaders(token), body: JSON.stringify({ password }) }).then((r) => handle<{ message: string }>(r)),
+
+  listDiscountCodes: (token: string) =>
+    fetch(`${API_BASE}/admin/discount-codes`, { headers: authHeaders(token) }).then((r) => handle<{ codes: any[] }>(r)),
+
+  createDiscountCode: (token: string, payload: any) =>
+    fetch(`${API_BASE}/admin/discount-codes`, { method: 'POST', headers: authHeaders(token), body: JSON.stringify(payload) }).then((r) => handle<any>(r)),
+
+  updateDiscountCode: (token: string, id: string, payload: any) =>
+    fetch(`${API_BASE}/admin/discount-codes/${id}`, { method: 'PUT', headers: authHeaders(token), body: JSON.stringify(payload) }).then((r) => handle<any>(r)),
 };

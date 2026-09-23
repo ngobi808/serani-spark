@@ -25,6 +25,7 @@ export function AdminLayout() {
           <NavLink to="/admin/dashboard" style={linkStyle}>Dashboard</NavLink>
           <NavLink to="/admin/products" style={linkStyle}>Products</NavLink>
           <NavLink to="/admin/stock-take" style={linkStyle}>Stock Take</NavLink>
+          <NavLink to="/admin/discount-codes" style={linkStyle}>Discount Codes</NavLink>
           <button
             onClick={logout}
             style={{ background: 'transparent', border: '1px solid var(--ss-gold)', color: 'var(--ss-gold)', padding: '0.4rem 0.8rem', borderRadius: 8, cursor: 'pointer' }}

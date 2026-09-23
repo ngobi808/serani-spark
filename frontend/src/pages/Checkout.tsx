@@ -13,6 +13,8 @@ export function Checkout() {
   const [stage, setStage] = useState<Stage>('form');
   const [errorMsg, setErrorMsg] = useState('');
   const [orderRef, setOrderRef] = useState('');
+  const [discountCode, setDiscountCode] = useState('');
+  const [appliedDiscount, setAppliedDiscount] = useState<number | null>(null);
   const [form, setForm] = useState({
     business_name: '', contact_name: '', phone_number: '', mpesa_phone_number: '',
     delivery_zone: '', address: '', landmark: '', city_or_county: '',
@@ -31,9 +33,11 @@ export function Checkout() {
       const result = await api.createOrder({
         ...form,
         items: lines.map((l) => ({ product_id: l.product.id, quantity: l.quantity })),
+        discount_code: discountCode.trim() || undefined,
       });
 
       setOrderRef(result.order.order_reference);
+      setAppliedDiscount(result.order.discount_amount_kes || 0);
 
       if (result.exceeds_mpesa_ceiling) {
         setStage('exceeds_ceiling');
@@ -96,6 +100,9 @@ export function Checkout() {
       <div className="ss-container">
         <h1>Check your phone</h1>
         <p>We've sent an M-Pesa payment prompt to <strong>{form.mpesa_phone_number}</strong>. Enter your PIN to complete order <strong>{orderRef}</strong>.</p>
+        {appliedDiscount !== null && appliedDiscount > 0 && (
+          <p style={{ color: 'var(--ss-success)' }}>Discount applied: -KSh {appliedDiscount.toLocaleString()}</p>
+        )}
         <p style={{ color: '#666' }}>This page will update automatically once payment is confirmed.</p>
       </div>
     );
@@ -115,9 +122,10 @@ export function Checkout() {
         <input placeholder="Address" value={form.address} onChange={(e) => updateField('address', e.target.value)} />
         <input placeholder="Landmark" value={form.landmark} onChange={(e) => updateField('landmark', e.target.value)} />
         <input placeholder="City / County" value={form.city_or_county} onChange={(e) => updateField('city_or_county', e.target.value)} />
+        <input placeholder="Promo code (optional)" value={discountCode} onChange={(e) => setDiscountCode(e.target.value.toUpperCase())} />
 
         <p style={{ color: '#666', fontSize: '0.85rem' }}>
-          This payment covers your product total (KSh {subtotal.toLocaleString()}) only. Serani Spark will contact you to arrange delivery.
+          This payment covers your product total (KSh {subtotal.toLocaleString()}{discountCode && ', minus any valid promo code'}) only. Serani Spark will contact you to arrange delivery.
         </p>
 
         <button className="ss-btn-primary" type="submit" disabled={stage === 'submitting'}>

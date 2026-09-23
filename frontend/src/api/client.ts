@@ -18,7 +18,7 @@ export const api = {
 
   getProduct: (id: string) => fetch(`${API_BASE}/products/${id}`).then((r) => handle<PublicProduct>(r)),
 
-  createOrder: (payload: CheckoutPayload) =>
+  createOrder: (payload: CheckoutPayload & { discount_code?: string }) =>
     fetch(`${API_BASE}/orders`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
