@@ -1,13 +1,12 @@
 import { pool } from '../config/db';
 
 /**
- * Generates a human-readable order reference like SS-1042.
- * Uses the count of existing orders + a fixed offset so references are
- * short and sequential-looking without needing a separate sequence table.
- * (Fine for MVP volume; revisit if concurrent order creation ever collides.)
+ * Generates a human-readable order reference like SS-1042, using a real
+ * Postgres sequence (order_reference_seq) rather than COUNT(*) — a plain row
+ * count collides the moment any order is ever deleted, since the count drops
+ * but old reference numbers still exist. A sequence only ever increases.
  */
 export async function generateOrderReference(): Promise<string> {
-  const result = await pool.query(`SELECT COUNT(*) AS count FROM orders`);
-  const nextNumber = Number(result.rows[0].count) + 1001; // starts at SS-1001
-  return `SS-${nextNumber}`;
+  const result = await pool.query(`SELECT nextval('order_reference_seq') AS next`);
+  return `SS-${result.rows[0].next}`;
 }
