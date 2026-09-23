@@ -21,7 +21,9 @@ function Header() {
   const itemCount = lines.reduce((sum, l) => sum + l.quantity, 0);
   return (
     <header className="ss-header">
-      <Link to="/" className="logo" style={{ textDecoration: 'none' }}>Serani Spark</Link>
+      <Link to="/" style={{ display: 'flex', alignItems: 'center' }}>
+        <img src="/logo.svg" alt="Serani Spark" style={{ height: 48, width: 'auto' }} />
+      </Link>
       <Link to="/cart" style={{ color: 'var(--ss-text-light)', textDecoration: 'none' }}>
         🛒 Cart {itemCount > 0 && `(${itemCount})`}
       </Link>
