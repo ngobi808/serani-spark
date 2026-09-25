@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { ShareButton } from '../components/ShareButton';
 
 export function Cart() {
   const { lines, updateQuantity, removeFromCart, subtotal } = useCart();
@@ -16,7 +17,10 @@ export function Cart() {
 
   return (
     <div className="ss-container">
-      <h1>Your Cart</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+        <h1 style={{ margin: 0 }}>Your Cart</h1>
+        <ShareButton title="Serani Spark" text="Check out Serani Spark's wholesale catalogue" url={window.location.origin} label="Share our store" />
+      </div>
       {lines.map((line) => (
         <div key={line.product.id} className="ss-card" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', gap: '0.75rem' }}>
           <Link

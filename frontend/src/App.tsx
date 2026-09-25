@@ -6,6 +6,7 @@ import { Cart } from './pages/Cart';
 import { Checkout } from './pages/Checkout';
 import { OrderConfirmation } from './pages/OrderConfirmation';
 import { WhatsAppFab } from './components/WhatsAppFab';
+import { Footer } from './components/Footer';
 import { AdminAuthProvider } from './admin/context/AdminAuthContext';
 import { AdminLayout } from './admin/components/AdminLayout';
 import { AdminLogin } from './admin/pages/AdminLogin';
@@ -45,6 +46,7 @@ function Storefront() {
         <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
       </Routes>
       <WhatsAppFab />
+      <Footer />
     </CartProvider>
   );
 }

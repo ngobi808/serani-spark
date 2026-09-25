@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useCart } from '../context/CartContext';
 import { StockBadge } from '../components/StockBadge';
+import { ShareButton } from '../components/ShareButton';
 import type { PublicProduct } from '../../../shared/types';
 
 export function ProductPage() {
@@ -60,16 +61,19 @@ export function ProductPage() {
           {belowMoq && <p style={{ color: 'var(--ss-danger)', fontSize: '0.85rem' }}>Minimum order is {product.moq}.</p>}
         </div>
 
-        <button
-          className="ss-btn-primary"
-          disabled={belowMoq || product.stock_status === 'out_of_stock'}
-          onClick={() => {
-            addToCart(product, quantity);
-            navigate('/cart');
-          }}
-        >
-          Add to Cart
-        </button>
+        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <button
+            className="ss-btn-primary"
+            disabled={belowMoq || product.stock_status === 'out_of_stock'}
+            onClick={() => {
+              addToCart(product, quantity);
+              navigate('/cart');
+            }}
+          >
+            Add to Cart
+          </button>
+          <ShareButton title={product.name} text={`Check out ${product.name} on Serani Spark`} url={window.location.href} />
+        </div>
       </div>
     </div>
   );
