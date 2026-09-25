@@ -176,6 +176,7 @@ export function AdminProducts() {
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr style={{ textAlign: 'left', borderBottom: '2px solid #ddd' }}>
+            <th style={{ padding: '0.5rem' }}></th>
             <th style={{ padding: '0.5rem' }}>Name</th>
             <th style={{ padding: '0.5rem' }}>Price</th>
             <th style={{ padding: '0.5rem' }}>Cost</th>
@@ -190,6 +191,13 @@ export function AdminProducts() {
             const margin = p.cost_price_kes ? Math.round(((p.selling_price_kes - p.cost_price_kes) / p.selling_price_kes) * 1000) / 10 : null;
             return (
               <tr key={p.id} style={{ borderBottom: '1px solid #eee', opacity: p.is_active ? 1 : 0.4 }}>
+                <td style={{ padding: '0.5rem' }}>
+                  <img
+                    src={p.image_urls?.[0] || 'https://placehold.co/40x40?text=SS'}
+                    alt={p.name}
+                    style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 6 }}
+                  />
+                </td>
                 <td style={{ padding: '0.5rem' }}>
                   <Link to={`/admin/products/${p.id}`} style={{ color: 'var(--ss-green-dark)', fontWeight: 600 }}>{p.name}</Link>
                   {!p.is_active && ' (inactive)'}
