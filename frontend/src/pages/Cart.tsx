@@ -19,7 +19,7 @@ export function Cart() {
     <div className="ss-container">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
         <h1 style={{ margin: 0 }}>Your Cart</h1>
-        <ShareButton title="Serani Spark" text="Check out Serani Spark's wholesale catalogue" url={window.location.origin} label="Share our store" />
+        <ShareButton title="Serani Spark" text="Check out Serani Spark's wholesale catalogue" url={window.location.origin} />
       </div>
       {lines.map((line) => (
         <div key={line.product.id} className="ss-card" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', gap: '0.75rem' }}>
