@@ -20,6 +20,7 @@ export function AdminProducts() {
   const [savingBatch, setSavingBatch] = useState(false);
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
+  const [addingNewCategory, setAddingNewCategory] = useState(false);
 
   function load() {
     if (!token) return;
@@ -43,6 +44,7 @@ export function AdminProducts() {
   }
 
   function startEdit(p: any) {
+    setAddingNewCategory(false);
     setForm({
       id: p.id,
       name: p.name,
@@ -87,6 +89,7 @@ export function AdminProducts() {
         await adminApi.createProduct(token, payload);
       }
       setForm(EMPTY_FORM);
+      setAddingNewCategory(false);
       load();
     } catch (err: any) {
       setError(err.message);
@@ -142,7 +145,31 @@ export function AdminProducts() {
       <form onSubmit={handleSubmit} className="ss-card" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', marginBottom: '2rem' }}>
         <h3 style={{ gridColumn: '1 / -1', margin: 0 }}>{form.id ? `Editing: ${form.name}` : 'Add New Product'}</h3>
         <input placeholder="Name *" required value={form.name} onChange={(e) => updateField('name', e.target.value)} />
-        <input placeholder="Category *" required value={form.category} onChange={(e) => updateField('category', e.target.value)} />
+        {addingNewCategory ? (
+          <input
+            placeholder="New category name"
+            required
+            value={form.category}
+            onChange={(e) => updateField('category', e.target.value)}
+          />
+        ) : (
+          <select
+            required
+            value={form.category}
+            onChange={(e) => {
+              if (e.target.value === '__new__') {
+                setAddingNewCategory(true);
+                updateField('category', '');
+              } else {
+                updateField('category', e.target.value);
+              }
+            }}
+          >
+            <option value="">Select category...</option>
+            {categories.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
+            <option value="__new__">+ Add new category</option>
+          </select>
+        )}
         <input placeholder="SKU" value={form.sku} onChange={(e) => updateField('sku', e.target.value)} />
         <input placeholder="Packaging unit (e.g. bale) *" required value={form.packaging_unit} onChange={(e) => updateField('packaging_unit', e.target.value)} />
         <input placeholder="Units per package" type="number" value={form.units_per_package} onChange={(e) => updateField('units_per_package', e.target.value)} />
@@ -155,7 +182,7 @@ export function AdminProducts() {
 
         <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '0.75rem' }}>
           <button className="ss-btn-primary" type="submit" disabled={saving}>{saving ? 'Saving...' : form.id ? 'Save Changes' : 'Add Product'}</button>
-          {form.id && <button type="button" className="ss-btn-secondary" onClick={() => setForm(EMPTY_FORM)}>Cancel</button>}
+          {form.id && <button type="button" className="ss-btn-secondary" onClick={() => { setForm(EMPTY_FORM); setAddingNewCategory(false); }}>Cancel</button>}
         </div>
       </form>
 
