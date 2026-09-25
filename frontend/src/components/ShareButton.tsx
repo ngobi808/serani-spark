@@ -4,9 +4,10 @@ interface ShareButtonProps {
   title: string;
   text?: string;
   url: string;
+  label?: string;
 }
 
-export function ShareButton({ title, text, url }: ShareButtonProps) {
+export function ShareButton({ title, text, url, label = 'Share' }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
 
   async function handleShare() {
@@ -33,7 +34,7 @@ export function ShareButton({ title, text, url }: ShareButtonProps) {
 
   return (
     <button className="ss-btn-secondary" onClick={handleShare} type="button">
-      {copied ? 'Link copied ✓' : '🔗 Share'}
+      {copied ? 'Link copied ✓' : `🔗 ${label}`}
     </button>
   );
 }
