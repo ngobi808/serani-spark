@@ -12,6 +12,7 @@ interface CartContextValue {
   updateQuantity: (productId: string, quantity: number) => void;
   removeFromCart: (productId: string) => void;
   clearCart: () => void;
+  loadCart: (newLines: CartLine[]) => void;
   subtotal: number;
 }
 
@@ -64,10 +65,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setLines([]);
   }
 
+  function loadCart(newLines: CartLine[]) {
+    setLines(newLines);
+  }
+
   const subtotal = lines.reduce((sum, l) => sum + l.product.price_kes * l.quantity, 0);
 
   return (
-    <CartContext.Provider value={{ lines, addToCart, updateQuantity, removeFromCart, clearCart, subtotal }}>
+    <CartContext.Provider value={{ lines, addToCart, updateQuantity, removeFromCart, clearCart, loadCart, subtotal }}>
       {children}
     </CartContext.Provider>
   );

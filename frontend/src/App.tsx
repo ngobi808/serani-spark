@@ -7,6 +7,7 @@ import { Checkout } from './pages/Checkout';
 import { OrderConfirmation } from './pages/OrderConfirmation';
 import { WhatsAppFab } from './components/WhatsAppFab';
 import { Footer } from './components/Footer';
+import { SharedCartLoader } from './components/SharedCartLoader';
 import { AdminAuthProvider } from './admin/context/AdminAuthContext';
 import { AdminLayout } from './admin/components/AdminLayout';
 import { AdminLogin } from './admin/pages/AdminLogin';
@@ -38,6 +39,7 @@ function Storefront() {
   return (
     <CartProvider>
       <Header />
+      <SharedCartLoader />
       <Routes>
         <Route path="/" element={<Catalogue />} />
         <Route path="/products/:id" element={<ProductPage />} />
