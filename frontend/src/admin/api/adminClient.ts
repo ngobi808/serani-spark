@@ -67,4 +67,7 @@ export const adminApi = {
 
   updateDiscountCode: (token: string, id: string, payload: any) =>
     fetch(`${API_BASE}/admin/discount-codes/${id}`, { method: 'PUT', headers: authHeaders(token), body: JSON.stringify(payload) }).then((r) => handle<any>(r)),
+
+  getSalesReport: (token: string, from: string, to: string, group: 'product' | 'category') =>
+    fetch(`${API_BASE}/admin/reports/sales?from=${from}&to=${to}&group=${group}`, { headers: authHeaders(token) }).then((r) => handle<any>(r)),
 };

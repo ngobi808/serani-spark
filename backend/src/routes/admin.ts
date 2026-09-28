@@ -11,6 +11,7 @@ import {
 import {
   listDiscountCodes, createDiscountCode, updateDiscountCode,
 } from '../controllers/discountController';
+import { getSalesReport } from '../controllers/reportsController';
 
 const router = Router();
 
@@ -37,5 +38,7 @@ router.delete('/orders/:id', deleteOrder);
 router.get('/discount-codes', listDiscountCodes);
 router.post('/discount-codes', createDiscountCode);
 router.put('/discount-codes/:id', updateDiscountCode);
+
+router.get('/reports/sales', getSalesReport);
 
 export default router;

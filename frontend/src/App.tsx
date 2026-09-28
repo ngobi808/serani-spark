@@ -16,6 +16,7 @@ import { AdminProducts } from './admin/pages/AdminProducts';
 import { AdminProductDetail } from './admin/pages/AdminProductDetail';
 import { AdminStockTake } from './admin/pages/AdminStockTake';
 import { AdminDiscountCodes } from './admin/pages/AdminDiscountCodes';
+import { AdminReports } from './admin/pages/AdminReports';
 import { AdminOrders } from './admin/pages/AdminOrders';
 import './styles/theme.css';
 
@@ -65,6 +66,7 @@ export default function App() {
           <Route path="products/:id" element={<AdminProductDetail />} />
           <Route path="stock-take" element={<AdminStockTake />} />
           <Route path="discount-codes" element={<AdminDiscountCodes />} />
+          <Route path="reports" element={<AdminReports />} />
           <Route path="orders" element={<AdminOrders />} />
         </Route>
         <Route path="/*" element={<Storefront />} />
