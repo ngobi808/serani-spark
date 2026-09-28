@@ -22,7 +22,9 @@ function titleForFilter(statusFilter: string): string {
 }
 
 export function AdminOrders() {
-  const { token } = useAdminAuth();
+  const { token, can } = useAdminAuth();
+  const canUpdateStatus = can('orders:update_status');
+  const canDelete = can('orders:delete');
   const [searchParams] = useSearchParams();
   const [orders, setOrders] = useState<any[]>([]);
   const [statusFilter, setStatusFilter] = useState(searchParams.get('status') ?? '');
@@ -156,13 +158,17 @@ export function AdminOrders() {
           <p><strong>Phone:</strong> {selected.order.phone_number} · <strong>M-Pesa:</strong> {selected.order.mpesa_phone_number}</p>
           <p><strong>Delivery:</strong> {selected.order.address}, {selected.order.landmark}, {selected.order.city_or_county} ({selected.order.delivery_zone})</p>
 
-          <label>
-            <strong>Status:</strong>{' '}
-            <select value={pendingStatus} onChange={(e) => setPendingStatus(e.target.value)}>
-              {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
-          </label>
-          {pendingStatus !== selected.order.status && (
+          {canUpdateStatus ? (
+            <label>
+              <strong>Status:</strong>{' '}
+              <select value={pendingStatus} onChange={(e) => setPendingStatus(e.target.value)}>
+                {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </label>
+          ) : (
+            <p><strong>Status:</strong> {selected.order.status}</p>
+          )}
+          {canUpdateStatus && pendingStatus !== selected.order.status && (
             <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
               <button className="ss-btn-primary" onClick={confirmStatusChange} disabled={statusSaving} style={{ padding: '0.4rem 0.9rem', fontSize: '0.85rem' }}>
                 {statusSaving ? 'Saving...' : `Confirm: ${selected.order.status} → ${pendingStatus}`}
@@ -206,7 +212,7 @@ export function AdminOrders() {
             Open WhatsApp
           </a>
 
-          <div style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid #eee' }}>
+          {canDelete && <div style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid #eee' }}>
             {!deleteOpen ? (
               <button
                 onClick={() => setDeleteOpen(true)}
@@ -245,7 +251,7 @@ export function AdminOrders() {
                 </div>
               </div>
             )}
-          </div>
+          </div>}
         </div>
       )}
     </div>

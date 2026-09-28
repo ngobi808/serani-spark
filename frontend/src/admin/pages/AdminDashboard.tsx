@@ -7,7 +7,9 @@ import { SalesTrendChart } from '../components/SalesTrendChart';
 const RANGE_LABELS: Record<string, string> = { today: 'Today', week: 'This Week', month: 'This Month', all: 'All Time' };
 
 export function AdminDashboard() {
-  const { token } = useAdminAuth();
+  const { token, can } = useAdminAuth();
+  // Roles without reports access (e.g. Operations & Support) only get order counts.
+  const showMoney = can('reports:view');
   const [data, setData] = useState<any>(null);
   const [range, setRange] = useState('all');
   const [error, setError] = useState('');
@@ -25,15 +27,17 @@ export function AdminDashboard() {
     { label: 'Pending Payment', value: data.pending_orders, link: '/admin/orders?status=pending_payment' },
     { label: 'Awaiting Fulfillment', value: data.awaiting_fulfillment_orders, link: '/admin/orders?status=paid,processing' },
     { label: 'Fulfilled', value: data.fulfilled_orders, link: '/admin/orders?status=fulfilled' },
-    { label: `Sales Total (${RANGE_LABELS[range]})`, value: `KSh ${data.sales_total_kes.toLocaleString()}`, link: '/admin/orders?status=paid,processing,fulfilled' },
-    { label: `Average Order Value (${RANGE_LABELS[range]})`, value: `KSh ${data.average_order_value_kes.toLocaleString()}`, link: '/admin/orders?status=paid,processing,fulfilled' },
+    ...(showMoney && data.sales_total_kes !== undefined ? [
+      { label: `Sales Total (${RANGE_LABELS[range]})`, value: `KSh ${data.sales_total_kes.toLocaleString()}`, link: '/admin/orders?status=paid,processing,fulfilled' },
+      { label: `Average Order Value (${RANGE_LABELS[range]})`, value: `KSh ${data.average_order_value_kes.toLocaleString()}`, link: '/admin/orders?status=paid,processing,fulfilled' },
+    ] : []),
   ];
 
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <h1 style={{ margin: 0 }}>Dashboard</h1>
-        <div style={{ display: 'flex', gap: '0.4rem' }}>
+        {showMoney && <div style={{ display: 'flex', gap: '0.4rem' }}>
           {Object.entries(RANGE_LABELS).map(([key, label]) => (
             <button
               key={key}
@@ -44,11 +48,11 @@ export function AdminDashboard() {
               {label}
             </button>
           ))}
-        </div>
+        </div>}
       </div>
-      <p style={{ color: '#666', fontSize: '0.85rem', margin: '0.4rem 0 1rem' }}>
+      {showMoney && <p style={{ color: '#666', fontSize: '0.85rem', margin: '0.4rem 0 1rem' }}>
         This range applies to Sales Total and Average Order Value only — order-count tiles always reflect current status, all-time.
-      </p>
+      </p>}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
         {cards.map((c) => {
@@ -68,11 +72,14 @@ export function AdminDashboard() {
         })}
       </div>
 
-      <div className="ss-card" style={{ marginBottom: '2rem' }}>
-        <h3 style={{ marginTop: 0 }}>Last 14 Days</h3>
-        <SalesTrendChart data={data.daily_sales_trend} />
-      </div>
+      {showMoney && data.daily_sales_trend && (
+        <div className="ss-card" style={{ marginBottom: '2rem' }}>
+          <h3 style={{ marginTop: 0 }}>Last 14 Days</h3>
+          <SalesTrendChart data={data.daily_sales_trend} />
+        </div>
+      )}
 
+      {showMoney && data.top_products && (<>
       <h2>Top Products</h2>
       {data.top_products.length === 0 ? (
         <p>No sales yet.</p>
@@ -96,6 +103,7 @@ export function AdminDashboard() {
           </tbody>
         </table>
       )}
+      </>)}
     </div>
   );
 }

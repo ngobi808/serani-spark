@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { pool } from '../config/db';
 import { deriveStockStatus } from '../services/stockService';
 import { AuthedRequest } from '../middleware/auth';
+import { hasPermission } from '../config/permissions';
 
 /**
  * GET /api/products
@@ -94,7 +95,7 @@ export async function getPublicProduct(req: Request, res: Response) {
 }
 
 /** GET /api/admin/products — ADMIN ONLY. Full visibility incl. cost price + real stock. */
-export async function listAdminProducts(_req: Request, res: Response) {
+export async function listAdminProducts(req: AuthedRequest, res: Response) {
   const result = await pool.query(`
     SELECT p.*,
            COALESCE((
@@ -105,22 +106,31 @@ export async function listAdminProducts(_req: Request, res: Response) {
     ORDER BY p.category, p.name
   `);
 
-  const products = result.rows.map((row) => ({
-    ...row,
-    selling_price_kes: Number(row.selling_price_kes),
-    cost_price_kes: row.cost_price_kes !== null ? Number(row.cost_price_kes) : null,
-    available_quantity: row.stock_quantity - Number(row.reserved),
-  }));
+  const canSeeCosts = hasPermission(req.adminRole, 'costs:view');
+
+  const products = result.rows.map((row) => {
+    const product = {
+      ...row,
+      selling_price_kes: Number(row.selling_price_kes),
+      cost_price_kes: row.cost_price_kes !== null ? Number(row.cost_price_kes) : null,
+      available_quantity: row.stock_quantity - Number(row.reserved),
+    };
+    // Buying prices never leave the server for roles without cost access.
+    if (!canSeeCosts) delete (product as any).cost_price_kes;
+    return product;
+  });
 
   res.json({ products });
 }
 
 /** POST /api/admin/products — ADMIN ONLY. */
-export async function createProduct(req: Request, res: Response) {
+export async function createProduct(req: AuthedRequest, res: Response) {
   const {
     name, description, category, sku, packaging_unit, units_per_package,
-    selling_price_kes, cost_price_kes, moq, stock_quantity, image_urls,
+    selling_price_kes, moq, stock_quantity, image_urls,
   } = req.body;
+  // Only roles with cost access may set a buying price; for others it is ignored.
+  const cost_price_kes = hasPermission(req.adminRole, 'costs:view') ? req.body.cost_price_kes : null;
 
   if (!name || !category || !packaging_unit || selling_price_kes === undefined) {
     return res.status(400).json({ error: 'name, category, packaging_unit and selling_price_kes are required.' });
@@ -140,7 +150,7 @@ export async function createProduct(req: Request, res: Response) {
 }
 
 /** PUT /api/admin/products/:id — ADMIN ONLY. Partial update. */
-export async function updateProduct(req: Request, res: Response) {
+export async function updateProduct(req: AuthedRequest, res: Response) {
   const { id } = req.params;
   const allowedFields = [
     'name', 'description', 'category', 'sku', 'packaging_unit', 'units_per_package',
@@ -150,7 +160,14 @@ export async function updateProduct(req: Request, res: Response) {
   const updates: string[] = [];
   const values: any[] = [];
 
+  const canSeeCosts = hasPermission(req.adminRole, 'costs:view');
+  const canDeactivate = hasPermission(req.adminRole, 'products:deactivate');
+
   for (const field of allowedFields) {
+    // A role that can't see buying prices must never overwrite them (the edit form
+    // doesn't send them), and only roles that may deactivate can change is_active.
+    if (field === 'cost_price_kes' && !canSeeCosts) continue;
+    if (field === 'is_active' && !canDeactivate) continue;
     if (field in req.body) {
       values.push(req.body[field]);
       updates.push(`${field} = $${values.length}`);

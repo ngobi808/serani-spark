@@ -5,6 +5,7 @@ import { reserveStockForOrder, InsufficientStockError, BelowMoqError, releaseRes
 import { generateOrderReference } from '../utils/orderReference';
 import { MPESA_TRANSACTION_CEILING_KES } from '../services/mpesaService';
 import { AuthedRequest } from '../middleware/auth';
+import { hasPermission } from '../config/permissions';
 import { validateAndComputeDiscount, incrementDiscountCodeUsage, InvalidDiscountCodeError } from './discountController';
 
 /**
@@ -179,7 +180,7 @@ export async function listAdminOrders(req: Request, res: Response) {
 }
 
 /** GET /api/admin/orders/:id — ADMIN ONLY. Full detail incl. items, customer, payment. */
-export async function getAdminOrderDetail(req: Request, res: Response) {
+export async function getAdminOrderDetail(req: AuthedRequest, res: Response) {
   const { id } = req.params;
 
   const orderResult = await pool.query(
@@ -203,9 +204,15 @@ export async function getAdminOrderDetail(req: Request, res: Response) {
     [id]
   );
 
+  // The buying price snapshot on each line is only for roles with cost access.
+  const canSeeCosts = hasPermission(req.adminRole, 'costs:view');
+  const items = canSeeCosts
+    ? itemsResult.rows
+    : itemsResult.rows.map(({ unit_cost_kes, ...rest }) => rest);
+
   res.json({
     order: orderResult.rows[0],
-    items: itemsResult.rows,
+    items,
     payments: paymentsResult.rows,
   });
 }

@@ -18,6 +18,9 @@ import { AdminStockTake } from './admin/pages/AdminStockTake';
 import { AdminDiscountCodes } from './admin/pages/AdminDiscountCodes';
 import { AdminReports } from './admin/pages/AdminReports';
 import { AdminOrders } from './admin/pages/AdminOrders';
+import { AdminUsers } from './admin/pages/AdminUsers';
+import { AdminAccount } from './admin/pages/AdminAccount';
+import { RequirePermission } from './admin/components/RequirePermission';
 import './styles/theme.css';
 
 function Header() {
@@ -61,13 +64,16 @@ export default function App() {
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Navigate to="dashboard" replace />} />
-          <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="products" element={<AdminProducts />} />
-          <Route path="products/:id" element={<AdminProductDetail />} />
-          <Route path="stock-take" element={<AdminStockTake />} />
-          <Route path="discount-codes" element={<AdminDiscountCodes />} />
-          <Route path="reports" element={<AdminReports />} />
-          <Route path="orders" element={<AdminOrders />} />
+          {/* Each page sits behind the permission the server also enforces (see backend config/permissions.ts). */}
+          <Route path="dashboard" element={<RequirePermission permission="dashboard:view"><AdminDashboard /></RequirePermission>} />
+          <Route path="products" element={<RequirePermission permission="products:view"><AdminProducts /></RequirePermission>} />
+          <Route path="products/:id" element={<RequirePermission permission="reports:view"><AdminProductDetail /></RequirePermission>} />
+          <Route path="stock-take" element={<RequirePermission permission="stock:adjust"><AdminStockTake /></RequirePermission>} />
+          <Route path="discount-codes" element={<RequirePermission permission="discounts:manage"><AdminDiscountCodes /></RequirePermission>} />
+          <Route path="reports" element={<RequirePermission permission="reports:view"><AdminReports /></RequirePermission>} />
+          <Route path="orders" element={<RequirePermission permission="orders:view"><AdminOrders /></RequirePermission>} />
+          <Route path="users" element={<RequirePermission permission="users:manage"><AdminUsers /></RequirePermission>} />
+          <Route path="account" element={<AdminAccount />} />
         </Route>
         <Route path="/*" element={<Storefront />} />
       </Routes>

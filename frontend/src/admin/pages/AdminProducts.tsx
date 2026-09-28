@@ -11,7 +11,13 @@ const EMPTY_FORM = {
 };
 
 export function AdminProducts() {
-  const { token } = useAdminAuth();
+  const { token, can } = useAdminAuth();
+  // What this person's role may see and do. (The server enforces the same rules.)
+  const canEdit = can('products:edit');
+  const canSeeCosts = can('costs:view');
+  const canDeactivate = can('products:deactivate');
+  const canAdjustStock = can('stock:adjust');
+  const canOpenDetail = can('reports:view');
   const [products, setProducts] = useState<any[]>([]);
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState('');
@@ -76,7 +82,7 @@ export function AdminProducts() {
       packaging_unit: form.packaging_unit,
       units_per_package: form.units_per_package ? Number(form.units_per_package) : null,
       selling_price_kes: Number(form.selling_price_kes),
-      cost_price_kes: form.cost_price_kes ? Number(form.cost_price_kes) : null,
+      ...(canSeeCosts ? { cost_price_kes: form.cost_price_kes ? Number(form.cost_price_kes) : null } : {}),
       moq: Number(form.moq),
       stock_quantity: Number(form.stock_quantity),
       image_urls: form.image_urls ? form.image_urls.split(',').map((s) => s.trim()).filter(Boolean) : [],
@@ -142,7 +148,7 @@ export function AdminProducts() {
       <h1>Products</h1>
       {error && <p style={{ color: 'var(--ss-danger)' }}>{error}</p>}
 
-      <form onSubmit={handleSubmit} className="ss-card" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', marginBottom: '2rem' }}>
+      {canEdit && <form onSubmit={handleSubmit} className="ss-card" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', marginBottom: '2rem' }}>
         <h3 style={{ gridColumn: '1 / -1', margin: 0 }}>{form.id ? `Editing: ${form.name}` : 'Add New Product'}</h3>
         <input placeholder="Name *" required value={form.name} onChange={(e) => updateField('name', e.target.value)} />
         {addingNewCategory ? (
@@ -175,7 +181,7 @@ export function AdminProducts() {
         <input placeholder="Units per package" type="number" value={form.units_per_package} onChange={(e) => updateField('units_per_package', e.target.value)} />
         <input placeholder="MOQ *" type="number" required value={form.moq} onChange={(e) => updateField('moq', e.target.value)} />
         <input placeholder="Selling price (KSh) *" type="number" required value={form.selling_price_kes} onChange={(e) => updateField('selling_price_kes', e.target.value)} />
-        <input placeholder="Cost price (KSh) — admin only" type="number" value={form.cost_price_kes} onChange={(e) => updateField('cost_price_kes', e.target.value)} />
+        {canSeeCosts && <input placeholder="Cost price (KSh), owner and finance only" type="number" value={form.cost_price_kes} onChange={(e) => updateField('cost_price_kes', e.target.value)} />}
         <input placeholder="Stock quantity *" type="number" required value={form.stock_quantity} onChange={(e) => updateField('stock_quantity', e.target.value)} />
         <input placeholder="Image URL(s), comma-separated" value={form.image_urls} onChange={(e) => updateField('image_urls', e.target.value)} style={{ gridColumn: '1 / -1' }} />
         <textarea placeholder="Description" value={form.description} onChange={(e) => updateField('description', e.target.value)} style={{ gridColumn: '1 / -1', padding: '0.5rem' }} />
@@ -184,7 +190,7 @@ export function AdminProducts() {
           <button className="ss-btn-primary" type="submit" disabled={saving}>{saving ? 'Saving...' : form.id ? 'Save Changes' : 'Add Product'}</button>
           {form.id && <button type="button" className="ss-btn-secondary" onClick={() => { setForm(EMPTY_FORM); setAddingNewCategory(false); }}>Cancel</button>}
         </div>
-      </form>
+      </form>}
 
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
         <input
@@ -206,11 +212,11 @@ export function AdminProducts() {
             <th style={{ padding: '0.5rem' }}></th>
             <th style={{ padding: '0.5rem' }}>Name</th>
             <th style={{ padding: '0.5rem' }}>Price</th>
-            <th style={{ padding: '0.5rem' }}>Cost</th>
-            <th style={{ padding: '0.5rem' }}>Margin</th>
+            {canSeeCosts && <th style={{ padding: '0.5rem' }}>Cost</th>}
+            {canSeeCosts && <th style={{ padding: '0.5rem' }}>Margin</th>}
             <th style={{ padding: '0.5rem' }}>Stock</th>
             <th style={{ padding: '0.5rem' }}>MOQ</th>
-            <th style={{ padding: '0.5rem' }}>Actions</th>
+            {(canEdit || canDeactivate) && <th style={{ padding: '0.5rem' }}>Actions</th>}
           </tr>
         </thead>
         <tbody>
@@ -226,12 +232,14 @@ export function AdminProducts() {
                   />
                 </td>
                 <td style={{ padding: '0.5rem' }}>
-                  <Link to={`/admin/products/${p.id}`} style={{ color: 'var(--ss-green-dark)', fontWeight: 600 }}>{p.name}</Link>
+                  {canOpenDetail
+                    ? <Link to={`/admin/products/${p.id}`} style={{ color: 'var(--ss-green-dark)', fontWeight: 600 }}>{p.name}</Link>
+                    : <strong>{p.name}</strong>}
                   {!p.is_active && ' (inactive)'}
                 </td>
                 <td style={{ padding: '0.5rem' }}>KSh {Number(p.selling_price_kes).toLocaleString()}</td>
-                <td style={{ padding: '0.5rem' }}>{p.cost_price_kes ? `KSh ${Number(p.cost_price_kes).toLocaleString()}` : '—'}</td>
-                <td style={{ padding: '0.5rem' }}>{margin !== null ? `${margin}%` : '—'}</td>
+                {canSeeCosts && <td style={{ padding: '0.5rem' }}>{p.cost_price_kes ? `KSh ${Number(p.cost_price_kes).toLocaleString()}` : '—'}</td>}
+                {canSeeCosts && <td style={{ padding: '0.5rem' }}>{margin !== null ? `${margin}%` : '—'}</td>}
                 <td style={{ padding: '0.5rem' }}>
                   {pendingStock[p.id] !== undefined ? (
                     <>
@@ -242,14 +250,20 @@ export function AdminProducts() {
                   ) : (
                     <>{p.stock_quantity} (avail: {p.available_quantity})</>
                   )}
-                  <button onClick={() => adjustStock(p, 1)} style={{ marginLeft: 6 }}>+</button>
-                  <button onClick={() => adjustStock(p, -1)} style={{ marginLeft: 2 }}>-</button>
+                  {canAdjustStock && (
+                    <>
+                      <button onClick={() => adjustStock(p, 1)} style={{ marginLeft: 6 }}>+</button>
+                      <button onClick={() => adjustStock(p, -1)} style={{ marginLeft: 2 }}>-</button>
+                    </>
+                  )}
                 </td>
                 <td style={{ padding: '0.5rem' }}>{p.moq}</td>
-                <td style={{ padding: '0.5rem' }}>
-                  <button className="ss-btn-secondary" onClick={() => startEdit(p)}>Edit</button>{' '}
-                  {p.is_active && <button className="ss-btn-secondary" onClick={() => deactivate(p)}>Deactivate</button>}
-                </td>
+                {(canEdit || canDeactivate) && (
+                  <td style={{ padding: '0.5rem' }}>
+                    {canEdit && <button className="ss-btn-secondary" onClick={() => startEdit(p)}>Edit</button>}{' '}
+                    {canDeactivate && p.is_active && <button className="ss-btn-secondary" onClick={() => deactivate(p)}>Deactivate</button>}
+                  </td>
+                )}
               </tr>
             );
           })}
