@@ -5,6 +5,7 @@ import { reserveStockForOrder, InsufficientStockError, BelowMoqError, releaseRes
 import { generateOrderReference } from '../utils/orderReference';
 import { MPESA_TRANSACTION_CEILING_KES } from '../services/mpesaService';
 import { AuthedRequest } from '../middleware/auth';
+import { CustomerAuthedRequest } from '../middleware/customerAuth';
 import { hasPermission } from '../config/permissions';
 import { validateAndComputeDiscount, incrementDiscountCodeUsage, InvalidDiscountCodeError } from './discountController';
 
@@ -15,11 +16,14 @@ import { validateAndComputeDiscount, incrementDiscountCodeUsage, InvalidDiscount
  * show "order created, now pay" as a distinct step, and so a customer who abandons
  * before paying still has a traceable pending_payment order.
  */
-export async function createOrder(req: Request, res: Response) {
+export async function createOrder(req: CustomerAuthedRequest, res: Response) {
   const {
-    business_name, contact_name, phone_number, mpesa_phone_number,
+    business_name, contact_name, phone_number, mpesa_phone_number, email,
     delivery_zone, address, landmark, city_or_county, items, discount_code,
   } = req.body;
+  // Present only when the storefront sent a valid, non-expired customer token
+  // (see optionalCustomer middleware on this route) - undefined for guests.
+  const customerAccountId = req.customerId ?? null;
 
   if (!contact_name || !phone_number || !mpesa_phone_number || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ error: 'contact_name, phone_number, mpesa_phone_number and a non-empty items array are required.' });
@@ -70,20 +74,23 @@ export async function createOrder(req: Request, res: Response) {
       total = Math.round((total - discountAmount) * 100) / 100;
     }
 
-    // 3. Create customer record (guest checkout — no account/login).
+    // 3. Create the per-order customer snapshot. This happens for EVERY order,
+    // logged-in or guest, exactly as before - it's what support and delivery use.
+    // `email` is optional even for guests, purely so they can get an order-
+    // confirmation email without creating an account.
     const customerResult = await client.query(
-      `INSERT INTO customers (business_name, contact_name, phone_number, mpesa_phone_number, delivery_zone, address, landmark, city_or_county)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id`,
-      [business_name ?? null, contact_name, phone_number, mpesa_phone_number, delivery_zone ?? null, address ?? null, landmark ?? null, city_or_county ?? null]
+      `INSERT INTO customers (business_name, contact_name, phone_number, mpesa_phone_number, delivery_zone, address, landmark, city_or_county, email)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id`,
+      [business_name ?? null, contact_name, phone_number, mpesa_phone_number, delivery_zone ?? null, address ?? null, landmark ?? null, city_or_county ?? null, email?.trim() || null]
     );
     const customerId = customerResult.rows[0].id;
 
     // 4. Create the order in pending_payment state.
     const orderReference = await generateOrderReference();
     const orderResult = await client.query(
-      `INSERT INTO orders (order_reference, customer_id, status, total_kes, discount_code, discount_amount_kes)
-       VALUES ($1, $2, 'pending_payment', $3, $4, $5) RETURNING id, order_reference, total_kes, status, created_at, discount_code, discount_amount_kes`,
-      [orderReference, customerId, total, appliedCode, discountAmount]
+      `INSERT INTO orders (order_reference, customer_id, customer_account_id, status, total_kes, discount_code, discount_amount_kes)
+       VALUES ($1, $2, $3, 'pending_payment', $4, $5, $6) RETURNING id, order_reference, total_kes, status, created_at, discount_code, discount_amount_kes`,
+      [orderReference, customerId, customerAccountId, total, appliedCode, discountAmount]
     );
     const order = orderResult.rows[0];
 

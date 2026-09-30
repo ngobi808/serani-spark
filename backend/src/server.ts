@@ -7,6 +7,7 @@ import productsRouter from './routes/products';
 import ordersRouter from './routes/orders';
 import paymentsRouter from './routes/payments';
 import adminRouter from './routes/admin';
+import customerRouter from './routes/customer';
 
 dotenv.config();
 
@@ -31,6 +32,7 @@ app.use('/api/products', productsRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/customer', customerRouter);
 
 // Fallback error handler — never leak stack traces to the client.
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

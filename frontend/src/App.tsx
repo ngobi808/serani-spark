@@ -8,6 +8,12 @@ import { OrderConfirmation } from './pages/OrderConfirmation';
 import { WhatsAppFab } from './components/WhatsAppFab';
 import { Footer } from './components/Footer';
 import { SharedCartLoader } from './components/SharedCartLoader';
+import { CustomerAuthProvider, useCustomerAuth } from './context/CustomerAuthContext';
+import { CustomerLogin } from './pages/CustomerLogin';
+import { CustomerRegister } from './pages/CustomerRegister';
+import { CustomerForgotPassword } from './pages/CustomerForgotPassword';
+import { CustomerResetPassword } from './pages/CustomerResetPassword';
+import { CustomerAccount } from './pages/CustomerAccount';
 import { AdminAuthProvider } from './admin/context/AdminAuthContext';
 import { AdminLayout } from './admin/components/AdminLayout';
 import { AdminLogin } from './admin/pages/AdminLogin';
@@ -25,6 +31,7 @@ import './styles/theme.css';
 
 function Header() {
   const { lines } = useCart();
+  const { token } = useCustomerAuth();
   const itemCount = lines.reduce((sum, l) => sum + l.quantity, 0);
   return (
     <header className="ss-header">
@@ -32,28 +39,40 @@ function Header() {
         <img src="/logo.svg" alt="Serani Spark" style={{ height: 48, width: 'auto' }} />
         <span className="logo">Serani Spark</span>
       </Link>
-      <Link to="/cart" style={{ color: 'var(--ss-text-light)', textDecoration: 'none' }}>
-        🛒 Cart {itemCount > 0 && `(${itemCount})`}
-      </Link>
+      <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
+        <Link to={token ? '/account' : '/login'} style={{ color: 'var(--ss-text-light)', textDecoration: 'none' }}>
+          {token ? 'My Account' : 'Sign In'}
+        </Link>
+        <Link to="/cart" style={{ color: 'var(--ss-text-light)', textDecoration: 'none' }}>
+          🛒 Cart {itemCount > 0 && `(${itemCount})`}
+        </Link>
+      </div>
     </header>
   );
 }
 
 function Storefront() {
   return (
-    <CartProvider>
-      <Header />
-      <SharedCartLoader />
-      <Routes>
-        <Route path="/" element={<Catalogue />} />
-        <Route path="/products/:id" element={<ProductPage />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
-      </Routes>
-      <WhatsAppFab />
-      <Footer />
-    </CartProvider>
+    <CustomerAuthProvider>
+      <CartProvider>
+        <Header />
+        <SharedCartLoader />
+        <Routes>
+          <Route path="/" element={<Catalogue />} />
+          <Route path="/products/:id" element={<ProductPage />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
+          <Route path="/login" element={<CustomerLogin />} />
+          <Route path="/register" element={<CustomerRegister />} />
+          <Route path="/forgot-password" element={<CustomerForgotPassword />} />
+          <Route path="/reset-password" element={<CustomerResetPassword />} />
+          <Route path="/account" element={<CustomerAccount />} />
+        </Routes>
+        <WhatsAppFab />
+        <Footer />
+      </CartProvider>
+    </CustomerAuthProvider>
   );
 }
 

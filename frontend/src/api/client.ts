@@ -18,10 +18,10 @@ export const api = {
 
   getProduct: (id: string) => fetch(`${API_BASE}/products/${id}`).then((r) => handle<PublicProduct>(r)),
 
-  createOrder: (payload: CheckoutPayload & { discount_code?: string }) =>
+  createOrder: (payload: CheckoutPayload & { discount_code?: string; email?: string }, customerToken?: string) =>
     fetch(`${API_BASE}/orders`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...(customerToken ? { Authorization: `Bearer ${customerToken}` } : {}) },
       body: JSON.stringify(payload),
     }).then((r) => handle<any>(r)),
 

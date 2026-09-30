@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useCustomerAuth } from '../context/CustomerAuthContext';
 import { api } from '../api/client';
 
 const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '254700000000';
@@ -15,10 +16,31 @@ export function Checkout() {
   const [orderRef, setOrderRef] = useState('');
   const [discountCode, setDiscountCode] = useState('');
   const [appliedDiscount, setAppliedDiscount] = useState<number | null>(null);
+  const { token: customerToken, account } = useCustomerAuth();
+  const [email, setEmail] = useState('');
   const [form, setForm] = useState({
     business_name: '', contact_name: '', phone_number: '', mpesa_phone_number: '',
     delivery_zone: '', address: '', landmark: '', city_or_county: '',
   });
+
+  // A logged-in customer's saved details prefill checkout, but stay fully editable
+  // for this one order - nothing here writes back to the account automatically.
+  useEffect(() => {
+    if (account) {
+      setForm((prev) => ({
+        ...prev,
+        business_name: account.business_name || prev.business_name,
+        contact_name: account.contact_name || prev.contact_name,
+        phone_number: account.phone_number || prev.phone_number,
+        mpesa_phone_number: account.mpesa_phone_number || prev.mpesa_phone_number,
+        delivery_zone: account.delivery_zone || prev.delivery_zone,
+        address: account.address || prev.address,
+        landmark: account.landmark || prev.landmark,
+        city_or_county: account.city_or_county || prev.city_or_county,
+      }));
+      setEmail(account.email);
+    }
+  }, [account]);
 
   function updateField(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -32,9 +54,10 @@ export function Checkout() {
     try {
       const result = await api.createOrder({
         ...form,
+        email: email.trim() || undefined,
         items: lines.map((l) => ({ product_id: l.product.id, quantity: l.quantity })),
         discount_code: discountCode.trim() || undefined,
-      });
+      }, customerToken || undefined);
 
       setOrderRef(result.order.order_reference);
       setAppliedDiscount(result.order.discount_amount_kes || 0);
@@ -122,6 +145,7 @@ export function Checkout() {
         <input placeholder="Address" value={form.address} onChange={(e) => updateField('address', e.target.value)} />
         <input placeholder="Landmark" value={form.landmark} onChange={(e) => updateField('landmark', e.target.value)} />
         <input placeholder="City / County" value={form.city_or_county} onChange={(e) => updateField('city_or_county', e.target.value)} />
+        <input type="email" placeholder="Email (optional, for an order confirmation email)" value={email} onChange={(e) => setEmail(e.target.value)} />
         <input placeholder="Promo code (optional)" value={discountCode} onChange={(e) => setDiscountCode(e.target.value.toUpperCase())} />
 
         <p style={{ color: '#666', fontSize: '0.85rem' }}>

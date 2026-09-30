@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { pool } from '../config/db';
+import { sendEmail, orderConfirmationEmail } from '../utils/email';
 import { initiateStkPush, extractCallbackMetadata, MpesaCallbackBody, MPESA_TRANSACTION_CEILING_KES } from '../services/mpesaService';
 import { commitReservationsForOrder, releaseReservationsForOrder } from '../services/stockService';
 
@@ -112,6 +113,23 @@ export async function handleMpesaCallback(req: Request, res: Response) {
       // Commit stock reservations -> permanent deduction (outside this transaction,
       // it manages its own).
       await commitReservationsForOrder(payment.order_id);
+
+      // Email confirmation is a nice-to-have on top of WhatsApp, so a lookup or
+      // send failure here must never affect the payment result already returned above.
+      try {
+        const orderRow = await pool.query(
+          `SELECT o.order_reference, o.total_kes, c.email
+           FROM orders o JOIN customers c ON c.id = o.customer_id WHERE o.id = $1`,
+          [payment.order_id]
+        );
+        const { order_reference, total_kes, email } = orderRow.rows[0] ?? {};
+        if (email) {
+          const { subject, html } = orderConfirmationEmail(order_reference, Number(total_kes));
+          await sendEmail(email, subject, html);
+        }
+      } catch (err) {
+        console.error('Order confirmation email failed (payment already succeeded)', err);
+      }
     } else {
       // Payment failed or was cancelled by the customer.
       await client.query(
