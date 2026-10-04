@@ -1,5 +1,5 @@
-import { Routes, Route, Link, Navigate } from 'react-router-dom';
-import { CartProvider, useCart } from './context/CartContext';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { CartProvider } from './context/CartContext';
 import { Catalogue } from './pages/Catalogue';
 import { ProductPage } from './pages/ProductPage';
 import { Cart } from './pages/Cart';
@@ -7,8 +7,9 @@ import { Checkout } from './pages/Checkout';
 import { OrderConfirmation } from './pages/OrderConfirmation';
 import { WhatsAppFab } from './components/WhatsAppFab';
 import { Footer } from './components/Footer';
+import { StoreHeader } from './components/StoreHeader';
 import { SharedCartLoader } from './components/SharedCartLoader';
-import { CustomerAuthProvider, useCustomerAuth } from './context/CustomerAuthContext';
+import { CustomerAuthProvider } from './context/CustomerAuthContext';
 import { CustomerLogin } from './pages/CustomerLogin';
 import { CustomerRegister } from './pages/CustomerRegister';
 import { CustomerForgotPassword } from './pages/CustomerForgotPassword';
@@ -29,33 +30,11 @@ import { AdminAccount } from './admin/pages/AdminAccount';
 import { RequirePermission } from './admin/components/RequirePermission';
 import './styles/theme.css';
 
-function Header() {
-  const { lines } = useCart();
-  const { token } = useCustomerAuth();
-  const itemCount = lines.reduce((sum, l) => sum + l.quantity, 0);
-  return (
-    <header className="ss-header">
-      <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', textDecoration: 'none' }}>
-        <img src="/logo.svg" alt="Serani Spark" style={{ height: 48, width: 'auto' }} />
-        <span className="logo">Serani Spark</span>
-      </Link>
-      <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
-        <Link to={token ? '/account' : '/login'} style={{ color: 'var(--ss-text-light)', textDecoration: 'none' }}>
-          {token ? 'My Account' : 'Sign In'}
-        </Link>
-        <Link to="/cart" style={{ color: 'var(--ss-text-light)', textDecoration: 'none' }}>
-          🛒 Cart {itemCount > 0 && `(${itemCount})`}
-        </Link>
-      </div>
-    </header>
-  );
-}
-
 function Storefront() {
   return (
     <CustomerAuthProvider>
       <CartProvider>
-        <Header />
+        <StoreHeader />
         <SharedCartLoader />
         <Routes>
           <Route path="/" element={<Catalogue />} />

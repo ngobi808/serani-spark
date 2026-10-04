@@ -45,7 +45,8 @@ h1, h2, h3, .ss-script {
   z-index: 100;
 }
 
-.ss-header .logo {
+.ss-header .logo,
+.ss-store-header .logo {
   font-family: var(--ss-font-display);
   font-size: 1.6rem;
   color: var(--ss-gold);
@@ -127,4 +128,273 @@ a.ss-card:hover {
   text-decoration: none;
   font-weight: 600;
   z-index: 50;
+}
+
+/* ------------------------------------------------------------------ */
+/* Storefront header: menu button, brand, sticky search, links.        */
+/* (The admin panel keeps using .ss-header above, unchanged.)          */
+/* ------------------------------------------------------------------ */
+
+.ss-store-header {
+  background: var(--ss-green-dark);
+  color: var(--ss-text-light);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: grid;
+  /* Phones: logo row on top, search on its own full-width row underneath. */
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    "menu brand links"
+    "search search search";
+  align-items: center;
+  column-gap: 0.75rem;
+  row-gap: 0.6rem;
+  padding: 0.6rem 0.9rem 0.7rem;
+}
+.ss-store-header--no-search {
+  grid-template-areas: "menu brand links";
+}
+
+.ss-store-header .logo {
+  font-size: 1.35rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ss-menu-btn {
+  grid-area: menu;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  background: transparent;
+  border: 1.5px solid rgba(245, 242, 234, 0.35);
+  border-radius: 10px;
+  color: var(--ss-text-light);
+  cursor: pointer;
+}
+.ss-menu-btn:hover { background: rgba(245, 242, 234, 0.08); }
+
+.ss-brand {
+  grid-area: brand;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  text-decoration: none;
+}
+.ss-brand img { height: 40px; width: auto; flex-shrink: 0; }
+
+.ss-header-links {
+  grid-area: links;
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+}
+.ss-header-links a {
+  color: var(--ss-text-light);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.ss-search {
+  grid-area: search;
+  position: relative;
+  width: 100%;
+}
+.ss-search input {
+  width: 100%;
+  padding: 0.65rem 2.5rem 0.65rem 2.5rem;
+  border: none;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ss-text-dark);
+  font-family: var(--ss-font-body);
+  font-size: 16px; /* 16px stops iPhones zooming the page when the box is tapped */
+  -webkit-appearance: none;
+  appearance: none;
+}
+.ss-search input::-webkit-search-cancel-button,
+.ss-search input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  display: none;
+}
+.ss-search-icon {
+  position: absolute;
+  left: 0.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #777;
+  pointer-events: none;
+}
+.ss-search-clear {
+  position: absolute;
+  right: 0.45rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #666;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.ss-search-clear:hover { background: rgba(0, 0, 0, 0.06); }
+
+.ss-menu-btn:focus-visible,
+.ss-search input:focus-visible,
+.ss-search-clear:focus-visible,
+.ss-header-links a:focus-visible,
+.ss-brand:focus-visible {
+  outline: 2px solid var(--ss-gold);
+  outline-offset: 2px;
+}
+
+/* Hide the category pills on phones (the menu drawer covers it) */
+.ss-category-pills {
+  display: none;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 419px) {
+  .ss-hide-xs { display: none; }
+}
+@media (max-width: 699px) {
+  .ss-hide-mobile { display: none !important; }
+}
+
+/* Tablet and desktop: everything on a single row */
+@media (min-width: 700px) {
+  .ss-store-header {
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    grid-template-areas: "menu brand search links";
+    column-gap: 1.25rem;
+    padding: 0.8rem 1.5rem;
+  }
+  .ss-store-header--no-search {
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: "menu brand links";
+  }
+  .ss-store-header .logo { font-size: 1.6rem; }
+  .ss-brand img { height: 46px; }
+  .ss-search { max-width: 520px; }
+}
+@media (min-width: 900px) {
+  .ss-category-pills { display: flex; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Category drawer                                                     */
+/* ------------------------------------------------------------------ */
+
+.ss-drawer-overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(13, 43, 38, 0.55);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0s linear 0.2s;
+  z-index: 200;
+}
+.ss-drawer-overlay.open {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.2s ease, visibility 0s;
+}
+
+.ss-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: min(320px, 85vw);
+  background: var(--ss-cream);
+  box-shadow: 4px 0 24px rgba(13, 43, 38, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  transform: translateX(-100%);
+  visibility: hidden;
+  transition: transform 0.25s ease, visibility 0s linear 0.25s;
+  z-index: 210;
+}
+.ss-drawer.open {
+  transform: translateX(0);
+  visibility: visible;
+  transition: transform 0.25s ease, visibility 0s;
+}
+
+.ss-drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.1rem;
+  border-bottom: 1px solid rgba(13, 43, 38, 0.12);
+}
+.ss-drawer-account {
+  padding: 0.5rem 1.1rem;
+  border: 1.5px solid var(--ss-green-dark);
+  border-radius: var(--ss-radius);
+  color: var(--ss-green-dark);
+  text-decoration: none;
+  font-weight: 500;
+}
+.ss-drawer-close {
+  background: none;
+  border: none;
+  padding: 0.25rem 0.55rem;
+  font-size: 1.4rem;
+  color: var(--ss-green-dark);
+  cursor: pointer;
+}
+
+.ss-drawer nav { padding: 1.1rem; }
+.ss-drawer-title {
+  font-family: var(--ss-font-display);
+  font-size: 1.4rem;
+  color: var(--ss-green-dark);
+  margin: 0 0 0.75rem;
+}
+.ss-drawer-note { color: #666; font-size: 0.9rem; margin: 0 0 0.75rem; }
+.ss-drawer ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+.ss-drawer li a {
+  display: block;
+  padding: 0.8rem 1rem;
+  background: #fff;
+  border: 1.5px solid var(--ss-green-dark);
+  border-radius: var(--ss-radius);
+  color: var(--ss-green-dark);
+  text-decoration: none;
+  font-weight: 500;
+}
+.ss-drawer li a:hover { background: rgba(13, 43, 38, 0.05); }
+.ss-drawer li a.active {
+  background: var(--ss-gold);
+  border-color: var(--ss-gold);
+  font-weight: 600;
+}
+.ss-drawer a:focus-visible,
+.ss-drawer-close:focus-visible {
+  outline: 2px solid var(--ss-green-dark);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ss-drawer, .ss-drawer-overlay { transition: none; }
 }
